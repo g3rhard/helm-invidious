@@ -1,8 +1,10 @@
 name: invidious
 
 image:
-  repository: quay.io/invidious/invidious
+  registry: quay.io
+  repository: invidious/invidious
   tag: latest
+  digest: ""
   pullPolicy: Always
 
 replicaCount: 1
