@@ -58,7 +58,7 @@ spec:
             port: 3000
             path: /
           initialDelaySeconds: 15
-      - name: inv_sig_helper
+      - name: inv-sig-helper
         image: quay.io/invidious/inv-sig-helper:latest # TODO
         command: ["--tcp", "0.0.0.0:12999"]
         env:
