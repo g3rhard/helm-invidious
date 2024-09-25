@@ -58,4 +58,24 @@ spec:
             port: 3000
             path: /
           initialDelaySeconds: 15
+      - name: inv_sig_helper
+        image: quay.io/invidious/inv-sig-helper:latest # TODO
+        command: ["--tcp", "0.0.0.0:12999"]
+        env:
+        - name: RUST_LOG
+          value: info
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+        resources:
+          limits:
+            cpu: "100m"
+            memory: "128Mi"
+          requests:
+            cpu: "50m"
+            memory: "64Mi"
       restartPolicy: Always

@@ -61,3 +61,4 @@ config:
   full_refresh: false
   https_only: false
   domain:
+  signature_server: inv_sig_helper:12999
