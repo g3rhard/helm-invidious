@@ -1,4 +1,6 @@
-# Invidious Helm chart
+# helm-invidious
+
+[![release][badge-gh-actions-release]][link-gh-actions-release]
 
 Easily deploy Invidious to Kubernetes.
 
@@ -39,3 +41,6 @@ $ helm delete invidious
 
 # To also delete the database, remove all invidious-postgresql PVCs
 ```
+
+[badge-gh-actions-release]: https://github.com/g3rhard/helm-invidious/actions/workflows/release.yml/badge.svg?branch=main
+[link-gh-actions-release]: https://github.com/g3rhard/helm-invidious/actions?query=workflow%3Arelease
