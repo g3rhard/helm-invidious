@@ -1,1 +1,26 @@
+# Ignore Helm release packages
 /charts/*.tgz
+
+# Ignore Helm release logs
+*.log
+
+# Ignore temporary files
+*.tmp
+*.swp
+
+# Ignore build directories
+/build/
+dist/
+
+# Ignore dependency directories
+/node_modules/
+vendor/
+
+# Ignore IDE specific files
+.idea/
+.vscode/
+*.iml
+
+# Ignore OS generated files
+.DS_Store
+Thumbs.db
