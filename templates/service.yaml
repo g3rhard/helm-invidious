@@ -1,20 +1,26 @@
+{{- range $svcName, $svcValues := .Values.services }}
+{{- if $svcValues.enabled }}
+---
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ template "invidious.fullname" . }}
+  name: {{ printf "%s-%s" (include "invidious.fullname" $) $svcName }}
   labels:
-    app: {{ template "invidious.name" . }}
-    chart: {{ .Chart.Name }}
-    release: {{ .Release.Name }}
+    app: {{ include "invidious.name" $ }}
+    chart: {{ $.Chart.Name }}
+    release: {{ $.Release.Name }}
+    service: {{ $svcName }}
 spec:
-  type: {{ .Values.service.type }}
+  type: {{ $svcValues.type }}
   ports:
-  - name: http
-    port: {{ .Values.service.port }}
-    targetPort: 3000
+    - name: http
+      port: {{ $svcValues.port }}
+      targetPort: {{ $svcValues.port }}
   selector:
-    app: {{ template "invidious.name" . }}
-    release: {{ .Release.Name }}
-{{- if .Values.service.loadBalancerIP }}
-  loadBalancerIP: {{ .Values.service.loadBalancerIP }}
+    app: {{ include "invidious.name" $ }}
+    release: {{ $.Release.Name }}
+{{- if $svcValues.loadBalancerIP }}
+  loadBalancerIP: {{ $svcValues.loadBalancerIP }}
+{{- end }}
+{{- end }}
 {{- end }}

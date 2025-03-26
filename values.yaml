@@ -1,9 +1,18 @@
 name: invidious
 
-image:
-  registry: quay.io
-  image: invidious/invidious:2024.09.28-53e8a5d@sha256:ba98d3155da3bdf0d5e3344281070d85cdb9b3d5cd5fee22a629128a303c30a5
-  pullPolicy: Always
+images:
+  invidious:
+    registry: quay.io
+    image: invidious/invidious:master
+    pullPolicy: Always
+  companion:
+    registry: quay.io
+    image: invidious/invidious:companion
+    pullPolicy: Always
+  materialious:
+    registry: docker.io
+    image: wardpearce/materialious:latest
+    pullPolicy: Always
 
 replicaCount: 1
 
@@ -13,10 +22,17 @@ autoscaling:
   maxReplicas: 16
   targetCPUUtilizationPercentage: 50
 
-service:
-  type: ClusterIP
-  port: 3000
-  #loadBalancerIP:
+services:
+  invidious:
+    enabled: true
+    type: ClusterIP
+    port: 3000
+    #loadBalancerIP:
+  materialious:
+    enabled: true
+    type: ClusterIP
+    port: 8282
+    #loadBalancerIP:
 
 resources: {}
   #requests:
@@ -59,4 +75,6 @@ config:
   full_refresh: false
   https_only: false
   domain:
-  signature_server: inv-sig-helper:12999
+  invidious_companion:
+    public_url: http://companion:8282
+  invidious_companion_key: CHANGE_ME

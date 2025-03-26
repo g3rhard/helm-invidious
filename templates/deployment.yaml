@@ -1,3 +1,4 @@
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -27,55 +28,90 @@ spec:
         - name: wait-for-postgresql
           image: postgres
           args:
-          - /bin/sh
-          - -c
-          - until pg_isready -h {{ .Values.config.db.host }} -p {{ .Values.config.db.port }} -U {{ .Values.config.db.user }}; do echo waiting for database; sleep 2; done;
+            - /bin/sh
+            - -c
+            - until pg_isready -h {{ .Values.config.db.host }} -p {{ .Values.config.db.port }} -U {{ .Values.config.db.user }}; do echo waiting for database; sleep 2; done;
       containers:
-      - name: {{ .Chart.Name }}
-        image: "{{ .Values.image.registry }}/{{ .Values.image.image }}"
-        imagePullPolicy: {{ .Values.image.pullPolicy }}
-        ports:
-        - containerPort: 3000
-        env:
-        - name: INVIDIOUS_CONFIG
-          valueFrom:
-            configMapKeyRef:
-              key: INVIDIOUS_CONFIG
-              name: {{ template "invidious.fullname" . }}
-        securityContext:
-          allowPrivilegeEscalation: {{ .Values.securityContext.allowPrivilegeEscalation }}
-          capabilities:
-            drop:
-            - ALL
-        resources:
-{{ toYaml .Values.resources | indent 10 }}
-        readinessProbe:
-          httpGet:
-            port: 3000
-            path: /
-        livenessProbe:
-          httpGet:
-            port: 3000
-            path: /
-          initialDelaySeconds: 15
-      - name: inv-sig-helper
-        image: quay.io/invidious/inv-sig-helper:latest # TODO
-        command: ["/app/inv_sig_helper_rust", "--tcp", "0.0.0.0:12999"]
-        env:
-        - name: RUST_LOG
-          value: info
-        securityContext:
-          allowPrivilegeEscalation: false
-          capabilities:
-            drop:
-            - ALL
-          readOnlyRootFilesystem: true
-          runAsNonRoot: true
-        resources:
-          limits:
-            cpu: "100m"
-            memory: "128Mi"
-          requests:
-            cpu: "50m"
-            memory: "64Mi"
+        - name: invidious
+          image: "{{ .Values.images.invidious.registry }}/{{ .Values.images.invidious.image }}"
+          imagePullPolicy: {{ .Values.images.invidious.pullPolicy }}
+          ports:
+            - containerPort: 3000
+          env:
+            - name: INVIDIOUS_CONFIG
+              valueFrom:
+                configMapKeyRef:
+                  key: INVIDIOUS_CONFIG
+                  name: {{ template "invidious.fullname" . }}
+          securityContext:
+            allowPrivilegeEscalation: {{ .Values.securityContext.allowPrivilegeEscalation }}
+            capabilities:
+              drop:
+                - ALL
+          resources:
+            {{- if .Values.resources }}
+            {{- with .Values.resources.requests }}
+            requests:
+              memory: {{ .memory | quote }}
+              cpu: {{ .cpu | quote }}
+            {{- end }}
+            {{- with .Values.resources.limits }}
+            limits:
+              memory: {{ .memory | quote }}
+              cpu: {{ .cpu | quote }}
+            {{- end }}
+            {{- end }}
+          readinessProbe:
+            httpGet:
+              port: 3000
+              path: /
+          livenessProbe:
+            httpGet:
+              port: 3000
+              path: /
+            initialDelaySeconds: 15
+        - name: companion
+          image: "{{ .Values.images.companion.registry }}/{{ .Values.images.companion.image }}"
+          imagePullPolicy: {{ .Values.images.companion.pullPolicy }}
+          env:
+            - name: RUST_LOG
+              value: info
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+          resources:
+            limits:
+              cpu: "100m"
+              memory: "128Mi"
+            requests:
+              cpu: "50m"
+              memory: "64Mi"
+        - name: materialious
+          image: {{ .Values.images.materialious.registry }}/{{ .Values.images.materialious.image }}
+          imagePullPolicy: {{ .Values.images.materialious.pullPolicy }}
+          env:
+            - name: RUST_LOG
+              value: info
+            - name: SERVER_BASE_URL
+              value: http://materialious:8282
+            - name: SERVER_SECRET_KEY
+              value: CHANGE_ME
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+          resources:
+            limits:
+              cpu: "100m"
+              memory: "128Mi"
+            requests:
+              cpu: "50m"
+              memory: "64Mi"
       restartPolicy: Always
