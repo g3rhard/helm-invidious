@@ -1,5 +1,5 @@
 # Ignore Helm release packages
-/charts/*.tgz
+*.tgz
 
 # Ignore Helm release logs
 *.log
