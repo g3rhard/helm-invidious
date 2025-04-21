@@ -9,4 +9,17 @@ metadata:
     release: {{ .Release.Name }}
 data:
   INVIDIOUS_CONFIG: |
-{{ toYaml .Values.config | indent 4 }}
+    channel_threads: {{ .Values.config.channel_threads | default 1 }}
+    feed_threads: {{ .Values.config.feed_threads | default 1 }}
+    db:
+      user: {{ .Values.postgresql.auth.username | default "kemal" }}
+      password: {{ .Values.postgresql.auth.password | default "kemal" }}
+      host: {{ template "invidious.fullname" . }}-postgresql
+      port: 5432
+      dbname: {{ .Values.postgresql.auth.database | default "invidious" }}
+    full_refresh: {{ .Values.config.full_refresh | default false }}
+    https_only: {{ .Values.config.https_only | default false }}
+    domain: {{ .Values.config.domain | default "invidious.local" }}
+    invidious_companion:
+      public_url: {{ .Values.config.invidious_companion.public_url | default "http://companion:8282" }}
+    invidious_companion_key: {{ .Values.config.invidious_companion_key | default "CHANGE_ME" }}
