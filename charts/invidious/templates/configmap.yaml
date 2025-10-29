@@ -33,10 +33,10 @@ data:
     use_innertube_for_captions: {{ .Values.config.use_innertube_for_captions | default true }}
     invidious_companion:
       # Private URL for internal communication
-      private_url: {{ .Values.config.invidious_companion.private_url | default "http://companion:8282/companion" }}
+      - private_url: {{ .Values.config.invidious_companion.private_url | default "http://companion:8282/companion" }}
       {{- if .Values.config.invidious_companion.public_url }}
       # Optional: Public URL for direct access via reverse proxy
-      public_url: {{ .Values.config.invidious_companion.public_url }}
+      - public_url: {{ .Values.config.invidious_companion.public_url }}
       {{- end }}
     # CRITICAL: Must be different from hmac_key
     invidious_companion_key: {{ .Values.config.invidious_companion_key | default "CHANGE_ME_GENERATE_RANDOM_16_CHARS" }}
