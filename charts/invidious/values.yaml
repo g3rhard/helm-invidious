@@ -80,7 +80,7 @@ postgresql:
       memory: "2Gi"
       cpu: "500m"
     limits:
-      memory: "4Gi"  
+      memory: "4Gi"
       cpu: "2000m"
 
 # Adapted from ../config/config.yml
@@ -88,7 +88,7 @@ config:
   channel_threads: 1
   feed_threads: 1
   db:
-    user: kemal
+    username: kemal
     password: kemal
     host: invidious-postgresql
     port: 5432
@@ -114,7 +114,7 @@ config:
 # Enable by setting services.materialious.enabled: true
 materialious:
   enabled: false  # Set to true to deploy Materialious
-  
+
   # Resource limits for Materialious
   resources:
     requests:
@@ -123,27 +123,27 @@ materialious:
     limits:
       cpu: 500m
       memory: 512Mi
-  
+
   # Materialious environment configuration
   config:
     # URL to your Invidious instance (will be auto-configured if not set)
     # VITE_DEFAULT_INVIDIOUS_INSTANCE: "https://invidious.example.com"
-    
-    # URL to your Companion instance (will be auto-configured if not set)  
+
+    # URL to your Companion instance (will be auto-configured if not set)
     # VITE_DEFAULT_COMPANION_INSTANCE: "https://companion.example.com"
-    
+
     # Return YouTube Dislikes API
     VITE_DEFAULT_RETURNYTDISLIKES_INSTANCE: "https://returnyoutubedislikeapi.com"
-    
+
     # SponsorBlock API
     VITE_DEFAULT_SPONSERBLOCK_INSTANCE: "https://sponsor.ajay.app"
-    
+
     # DeArrow API
     VITE_DEFAULT_DEARROW_INSTANCE: "https://sponsor.ajay.app"
-    
+
     # DeArrow thumbnail instance
     VITE_DEFAULT_DEARROW_THUMBNAIL_INSTANCE: "https://dearrow-thumb.ajay.app"
-    
+
     # Default settings (JSON string)
     # See: https://github.com/Materialious/Materialious/blob/main/docs/SETTINGS.md
     VITE_DEFAULT_SETTINGS: '{"themeColor": "#2596be","region": "US"}'
