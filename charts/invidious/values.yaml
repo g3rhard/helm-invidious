@@ -3,11 +3,11 @@ name: invidious
 images:
   invidious:
     registry: quay.io
-    image: invidious/invidious:master
+    image: invidious/invidious:latest
     pullPolicy: Always
   companion:
     registry: quay.io
-    image: invidious/invidious:companion
+    image: invidious/invidious-companion:latest
     pullPolicy: Always
   materialious:
     registry: docker.io
@@ -29,24 +29,37 @@ services:
     port: 3000
     #loadBalancerIP:
   materialious:
-    enabled: true
+    enabled: false  # Set to true to enable Materialious frontend
     type: ClusterIP
-    port: 8282
+    port: 80
     #loadBalancerIP:
 
-resources: {}
-  #requests:
-  #  cpu: 100m
-  #  memory: 64Mi
-  #limits:
-  #  cpu: 800m
-  #  memory: 512Mi
+# Resource recommendations based on documentation
+resources:
+  requests:
+    cpu: 500m
+    memory: 1Gi
+  limits:
+    cpu: 2000m
+    memory: 4Gi
 
 securityContext:
   allowPrivilegeEscalation: false
   runAsUser: 1000
   runAsGroup: 1000
   fsGroup: 1000
+  runAsNonRoot: true
+  seccompProfile:
+    type: RuntimeDefault
+
+# Pod security context
+podSecurityContext:
+  runAsUser: 1000
+  runAsGroup: 1000
+  fsGroup: 1000
+  runAsNonRoot: true
+  seccompProfile:
+    type: RuntimeDefault
 
 # See https://github.com/bitnami/charts/tree/master/bitnami/postgresql
 postgresql:
@@ -61,6 +74,14 @@ postgresql:
       username: kemal
       password: kemal
       scriptsConfigMap: invidious-postgresql-init
+  # Resource recommendations from documentation
+  resources:
+    requests:
+      memory: "2Gi"
+      cpu: "500m"
+    limits:
+      memory: "4Gi"  
+      cpu: "2000m"
 
 # Adapted from ../config/config.yml
 config:
@@ -72,9 +93,57 @@ config:
     host: invidious-postgresql
     port: 5432
     dbname: invidious
+  check_tables: true
   full_refresh: false
   https_only: false
   domain:
+  # CRITICAL: Generate using: pwgen 20 1
+  hmac_key: "CHANGE_ME_GENERATE_RANDOM_20_CHARS"
+  # Performance optimizations for public instances
+  use_pubsub_feeds: true
+  use_innertube_for_captions: true
   invidious_companion:
-    public_url: http://companion:8282
-  invidious_companion_key: CHANGE_ME
+    # Internal URL for communication between invidious and companion
+    private_url: "http://companion:8282/companion"
+    # Optional: public_url for direct companion access via reverse proxy
+    # public_url: "https://MYDOMAIN/companion"
+  # CRITICAL: Generate a different key than hmac_key using: pwgen 16 1
+  invidious_companion_key: "CHANGE_ME_GENERATE_RANDOM_16_CHARS"
+
+# Materialious configuration (optional modern material design frontend)
+# Enable by setting services.materialious.enabled: true
+materialious:
+  enabled: false  # Set to true to deploy Materialious
+  
+  # Resource limits for Materialious
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+  
+  # Materialious environment configuration
+  config:
+    # URL to your Invidious instance (will be auto-configured if not set)
+    # VITE_DEFAULT_INVIDIOUS_INSTANCE: "https://invidious.example.com"
+    
+    # URL to your Companion instance (will be auto-configured if not set)  
+    # VITE_DEFAULT_COMPANION_INSTANCE: "https://companion.example.com"
+    
+    # Return YouTube Dislikes API
+    VITE_DEFAULT_RETURNYTDISLIKES_INSTANCE: "https://returnyoutubedislikeapi.com"
+    
+    # SponsorBlock API
+    VITE_DEFAULT_SPONSERBLOCK_INSTANCE: "https://sponsor.ajay.app"
+    
+    # DeArrow API
+    VITE_DEFAULT_DEARROW_INSTANCE: "https://sponsor.ajay.app"
+    
+    # DeArrow thumbnail instance
+    VITE_DEFAULT_DEARROW_THUMBNAIL_INSTANCE: "https://dearrow-thumb.ajay.app"
+    
+    # Default settings (JSON string)
+    # See: https://github.com/Materialious/Materialious/blob/main/docs/SETTINGS.md
+    VITE_DEFAULT_SETTINGS: '{"themeColor": "#2596be","region": "US"}'

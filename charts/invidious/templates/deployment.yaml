@@ -21,12 +21,15 @@ spec:
         release: {{ .Release.Name }}
     spec:
       securityContext:
-        runAsUser: {{ .Values.securityContext.runAsUser }}
-        runAsGroup: {{ .Values.securityContext.runAsGroup }}
-        fsGroup: {{ .Values.securityContext.fsGroup }}
+        runAsUser: {{ .Values.podSecurityContext.runAsUser }}
+        runAsGroup: {{ .Values.podSecurityContext.runAsGroup }}
+        fsGroup: {{ .Values.podSecurityContext.fsGroup }}
+        runAsNonRoot: {{ .Values.podSecurityContext.runAsNonRoot }}
+        seccompProfile:
+          type: {{ .Values.podSecurityContext.seccompProfile.type }}
       initContainers:
         - name: wait-for-postgresql
-          image: postgres
+          image: postgres:14
           args:
             - /bin/sh
             - -c
@@ -45,73 +48,67 @@ spec:
                   name: {{ template "invidious.fullname" . }}
           securityContext:
             allowPrivilegeEscalation: {{ .Values.securityContext.allowPrivilegeEscalation }}
+            runAsNonRoot: {{ .Values.securityContext.runAsNonRoot }}
             capabilities:
               drop:
                 - ALL
+            seccompProfile:
+              type: {{ .Values.securityContext.seccompProfile.type }}
           resources:
-            {{- if .Values.resources }}
-            {{- with .Values.resources.requests }}
-            requests:
-              memory: {{ .memory | quote }}
-              cpu: {{ .cpu | quote }}
-            {{- end }}
-            {{- with .Values.resources.limits }}
-            limits:
-              memory: {{ .memory | quote }}
-              cpu: {{ .cpu | quote }}
-            {{- end }}
-            {{- end }}
+{{ toYaml .Values.resources | indent 12 }}
           readinessProbe:
             httpGet:
               port: 3000
-              path: /
+              path: /api/v1/trending
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
           livenessProbe:
             httpGet:
               port: 3000
-              path: /
-            initialDelaySeconds: 15
+              path: /api/v1/trending
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 2
         - name: companion
           image: "{{ .Values.images.companion.registry }}/{{ .Values.images.companion.image }}"
           imagePullPolicy: {{ .Values.images.companion.pullPolicy }}
+          ports:
+            - containerPort: 8282
           env:
-            - name: RUST_LOG
-              value: info
+            - name: SERVER_SECRET_KEY
+              value: "{{ .Values.config.invidious_companion_key }}"
           securityContext:
             allowPrivilegeEscalation: false
+            runAsNonRoot: true
             capabilities:
               drop:
                 - ALL
             readOnlyRootFilesystem: true
-            runAsNonRoot: true
           resources:
             limits:
+              cpu: "200m"
+              memory: "256Mi"
+            requests:
               cpu: "100m"
               memory: "128Mi"
-            requests:
-              cpu: "50m"
-              memory: "64Mi"
-        - name: materialious
-          image: {{ .Values.images.materialious.registry }}/{{ .Values.images.materialious.image }}
-          imagePullPolicy: {{ .Values.images.materialious.pullPolicy }}
-          env:
-            - name: RUST_LOG
-              value: info
-            - name: SERVER_BASE_URL
-              value: http://materialious:8282
-            - name: SERVER_SECRET_KEY
-              value: CHANGE_ME
-          securityContext:
-            allowPrivilegeEscalation: false
-            capabilities:
-              drop:
-                - ALL
-            readOnlyRootFilesystem: false
-            runAsNonRoot: false
-          resources:
-            limits:
-              cpu: "100m"
-              memory: "128Mi"
-            requests:
-              cpu: "50m"
-              memory: "64Mi"
+          volumeMounts:
+            - name: companion-cache
+              mountPath: /var/tmp/youtubei.js
+          livenessProbe:
+            httpGet:
+              port: 8282
+              path: /
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              port: 8282
+              path: /
+            initialDelaySeconds: 5
+            periodSeconds: 10
+      volumes:
+        - name: companion-cache
+          emptyDir: {}
       restartPolicy: Always

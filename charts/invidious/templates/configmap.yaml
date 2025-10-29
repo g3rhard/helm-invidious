@@ -17,9 +17,26 @@ data:
       host: {{ template "invidious.fullname" . }}-postgresql
       port: 5432
       dbname: {{ .Values.postgresql.auth.database | default "invidious" }}
+    check_tables: {{ .Values.config.check_tables | default true }}
     full_refresh: {{ .Values.config.full_refresh | default false }}
     https_only: {{ .Values.config.https_only | default false }}
-    domain: {{ .Values.config.domain | default "invidious.local" }}
+    {{- if .Values.config.domain }}
+    domain: {{ .Values.config.domain }}
+    {{- end }}
+    {{- if .Values.config.external_port }}
+    external_port: {{ .Values.config.external_port }}
+    {{- end }}
+    # CRITICAL: Must be set to a random value
+    hmac_key: {{ .Values.config.hmac_key | default "CHANGE_ME_GENERATE_RANDOM_20_CHARS" }}
+    # Performance optimizations for public instances
+    use_pubsub_feeds: {{ .Values.config.use_pubsub_feeds | default true }}
+    use_innertube_for_captions: {{ .Values.config.use_innertube_for_captions | default true }}
     invidious_companion:
-      public_url: {{ .Values.config.invidious_companion.public_url | default "http://companion:8282" }}
-    invidious_companion_key: {{ .Values.config.invidious_companion_key | default "CHANGE_ME" }}
+      # Private URL for internal communication
+      private_url: {{ .Values.config.invidious_companion.private_url | default "http://companion:8282/companion" }}
+      {{- if .Values.config.invidious_companion.public_url }}
+      # Optional: Public URL for direct access via reverse proxy
+      public_url: {{ .Values.config.invidious_companion.public_url }}
+      {{- end }}
+    # CRITICAL: Must be different from hmac_key
+    invidious_companion_key: {{ .Values.config.invidious_companion_key | default "CHANGE_ME_GENERATE_RANDOM_16_CHARS" }}

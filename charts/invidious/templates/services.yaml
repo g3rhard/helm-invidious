@@ -17,7 +17,12 @@ spec:
       port: {{ $svcValues.port }}
       targetPort: {{ $svcValues.port }}
   selector:
+    {{- if eq $svcName "materialious" }}
+    app: {{ include "invidious.name" $ }}-materialious
+    component: materialious
+    {{- else }}
     app: {{ include "invidious.name" $ }}
+    {{- end }}
     release: {{ $.Release.Name }}
 {{- if $svcValues.loadBalancerIP }}
   loadBalancerIP: {{ $svcValues.loadBalancerIP }}

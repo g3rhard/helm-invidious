@@ -1,0 +1,76 @@
+{{- if .Values.materialious.enabled }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ template "invidious.fullname" . }}-materialious
+  labels:
+    app: {{ template "invidious.name" . }}-materialious
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: {{ .Release.Name }}
+    component: materialious
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ template "invidious.name" . }}-materialious
+      release: {{ .Release.Name }}
+      component: materialious
+  template:
+    metadata:
+      labels:
+        app: {{ template "invidious.name" . }}-materialious
+        chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+        release: {{ .Release.Name }}
+        component: materialious
+    spec:
+      securityContext:
+        runAsUser: {{ .Values.podSecurityContext.runAsUser }}
+        runAsGroup: {{ .Values.podSecurityContext.runAsGroup }}
+        fsGroup: {{ .Values.podSecurityContext.fsGroup }}
+        runAsNonRoot: {{ .Values.podSecurityContext.runAsNonRoot }}
+        seccompProfile:
+          type: {{ .Values.podSecurityContext.seccompProfile.type }}
+      containers:
+        - name: materialious
+          image: "{{ .Values.images.materialious.registry }}/{{ .Values.images.materialious.image }}"
+          imagePullPolicy: {{ .Values.images.materialious.pullPolicy }}
+          ports:
+            - containerPort: 80
+          env:
+            - name: VITE_DEFAULT_INVIDIOUS_INSTANCE
+              value: {{ .Values.materialious.config.VITE_DEFAULT_INVIDIOUS_INSTANCE | default (printf "http://%s-invidious:3000" (include "invidious.fullname" .)) }}
+            - name: VITE_DEFAULT_RETURNYTDISLIKES_INSTANCE
+              value: {{ .Values.materialious.config.VITE_DEFAULT_RETURNYTDISLIKES_INSTANCE }}
+            - name: VITE_DEFAULT_SPONSERBLOCK_INSTANCE
+              value: {{ .Values.materialious.config.VITE_DEFAULT_SPONSERBLOCK_INSTANCE }}
+            - name: VITE_DEFAULT_DEARROW_INSTANCE
+              value: {{ .Values.materialious.config.VITE_DEFAULT_DEARROW_INSTANCE }}
+            - name: VITE_DEFAULT_DEARROW_THUMBNAIL_INSTANCE
+              value: {{ .Values.materialious.config.VITE_DEFAULT_DEARROW_THUMBNAIL_INSTANCE }}
+            - name: VITE_DEFAULT_SETTINGS
+              value: {{ .Values.materialious.config.VITE_DEFAULT_SETTINGS | quote }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            capabilities:
+              drop:
+                - ALL
+            seccompProfile:
+              type: RuntimeDefault
+          resources:
+{{ toYaml .Values.materialious.resources | indent 12 }}
+          readinessProbe:
+            httpGet:
+              port: 80
+              path: /
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              port: 80
+              path: /
+            initialDelaySeconds: 15
+            periodSeconds: 30
+      restartPolicy: Always
+{{- end }}
