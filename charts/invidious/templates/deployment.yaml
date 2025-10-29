@@ -96,18 +96,18 @@ spec:
           volumeMounts:
             - name: companion-cache
               mountPath: /var/tmp/youtubei.js
-          livenessProbe:
-            httpGet:
-              port: 8282
-              path: /
-            initialDelaySeconds: 30
-            periodSeconds: 30
-          readinessProbe:
-            httpGet:
-              port: 8282
-              path: /
-            initialDelaySeconds: 5
-            periodSeconds: 10
+          # livenessProbe:
+          #   httpGet:
+          #     port: 8282
+          #     path: /
+          #   initialDelaySeconds: 30
+          #   periodSeconds: 30
+          # readinessProbe:
+          #   httpGet:
+          #     port: 8282
+          #     path: /
+          #   initialDelaySeconds: 5
+          #   periodSeconds: 10
       volumes:
         - name: companion-cache
           emptyDir: {}
