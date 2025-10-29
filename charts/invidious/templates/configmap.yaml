@@ -40,3 +40,4 @@ data:
       {{- end }}
     # CRITICAL: Must be different from hmac_key
     invidious_companion_key: {{ .Values.config.invidious_companion_key | default "CHANGE_ME_GENERATE_RANDOM_16_CHARS" }}
+    log_level: {{ .Values.config.log_level | default "Info" }}
