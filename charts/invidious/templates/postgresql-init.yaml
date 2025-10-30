@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: invidious-postgresql-init
+  name: {{ template "invidious.fullname" . }}-postgresql-init
   labels:
     app: {{ template "invidious.name" . }}
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
