@@ -130,6 +130,7 @@ config:
 
 # Companion configuration
 companion:
+  enabled: true  # Set to false if using external companion
 
   # Optional resource allocation for companion
   # Uncomment and adjust based on your needs
