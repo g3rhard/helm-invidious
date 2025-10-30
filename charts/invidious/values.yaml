@@ -120,9 +120,9 @@ config:
   # Performance optimizations for public instances
   use_pubsub_feeds: true
   use_innertube_for_captions: true
-  # invidious_companion:
+  invidious_companion:
   #   # Internal URL for communication between invidious and companion
-  #   - private_url: "http://companion:8282/companion"
+  #   private_url: "http://companion:8282/companion"
   #   # Optional: public_url for direct companion access via reverse proxy
   #   # public_url: "https://MYDOMAIN/companion"
   # CRITICAL: Generate a different key than hmac_key using: pwgen 16 1
