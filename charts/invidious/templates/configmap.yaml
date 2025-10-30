@@ -38,10 +38,10 @@ data:
     invidious_companion:
       # Private URL for internal communication
       - private_url: http://{{ template "invidious.fullname" . }}-companion:8282/companion
-      {{- if .Values.config.invidious_companion.public_url }}
-      # Optional: Public URL for direct access via reverse proxy
-      - public_url: {{ .Values.config.invidious_companion.public_url }}
-      {{- end }}
+      # {{- if .Values.config.invidious_companion.public_url }}
+      # # Optional: Public URL for direct access via reverse proxy
+      # - public_url: {{ .Values.config.invidious_companion.public_url }}
+      # {{- end }}
     # CRITICAL: Must be different from hmac_key
     invidious_companion_key: {{ .Values.config.invidious_companion_key | default "CHANGE_ME_GENERATE_RANDOM_16_CHARS" }}
     log_level: {{ .Values.config.log_level | default "Info" }}
