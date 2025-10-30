@@ -37,7 +37,7 @@ data:
     use_innertube_for_captions: {{ .Values.config.use_innertube_for_captions | default true }}
     invidious_companion:
       # Private URL for internal communication
-      - private_url: {{ .Values.config.invidious_companion.private_url | default (printf "http://%s-companion:8282/companion" (include "invidious.fullname" .)) }}
+      - private_url: http://{{ template "invidious.fullname" . }}-companion:8282/companion
       {{- if .Values.config.invidious_companion.public_url }}
       # Optional: Public URL for direct access via reverse proxy
       - public_url: {{ .Values.config.invidious_companion.public_url }}
