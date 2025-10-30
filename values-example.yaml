@@ -32,6 +32,11 @@ services:
     type: ClusterIP
     port: 3000
     #loadBalancerIP:
+  companion:
+    enabled: true  # Set to false if using external companion
+    type: ClusterIP
+    port: 8282
+    #loadBalancerIP:
   materialious:
     enabled: false  # Set to true to enable Materialious frontend
     type: ClusterIP
@@ -68,30 +73,42 @@ podSecurityContext:
   seccompProfile:
     type: RuntimeDefault
 
-# PostgreSQL configuration
-# See https://github.com/bitnami/charts/tree/master/bitnami/postgresql
-postgresql:
-  image:
-    tag: 14
+# Database configuration
+database:
+  # Set to false to use external database
+  internal:
+    enabled: true
+    image:
+      registry: docker.io
+      repository: postgres
+      tag: "14"
+      pullPolicy: IfNotPresent
+
+    # Resource recommendations from documentation
+    resources:
+      requests:
+        memory: 2Gi
+        cpu: 500m
+      limits:
+        memory: 4Gi
+        cpu: 2000m
+
+    # Persistence configuration
+    persistence:
+      enabled: true
+      size: 20Gi
+      # storageClass: ""
+
+  # Database authentication (used for both internal and external)
   auth:
     username: kemal
     password: kemal
     database: invidious
-  primary:
-    initdb:
-      username: kemal
-      password: kemal
-      scriptsConfigMap: invidious-postgresql-init
-  # Resource recommendations from documentation
-  resources:
-    requests:
-      memory: "2Gi"
-      cpu: "500m"
-    limits:
-      memory: "4Gi"
-      cpu: "2000m"
 
-# Invidious configuration
+  # External database configuration (when internal.enabled: false)
+  external:
+    host: ""
+    port: 5432 # Invidious configuration
 # Adapted from config/config.yml
 config:
   # Basic threading configuration
@@ -147,15 +164,45 @@ config:
 #   hmac_key: "your_generated_20_char_key"
 #   invidious_companion_key: "your_generated_16_char_key"
 #   invidious_companion:
-#     private_url: "http://companion:8282/companion"
+#     - private_url: "http://companion:8282/companion"
 #     public_url: "https://invidious.example.com/companion"
+
+# Companion configuration
+companion:
+  replicaCount: 1
+
+  # Optional resource allocation for companion
+  # Uncomment and adjust based on your monitoring and requirements
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
+
+  # Optional health probes for companion
+  # Uncomment and adjust based on your requirements
+  # livenessProbe:
+  #   httpGet:
+  #     port: 8282
+  #     path: /
+  #   initialDelaySeconds: 30
+  #   periodSeconds: 30
+  # readinessProbe:
+  #   httpGet:
+  #     port: 8282
+  #     path: /
+  #   initialDelaySeconds: 5
+  #   periodSeconds: 10
 
 # Materialious configuration (optional modern material design frontend)
 # Enable by setting services.materialious.enabled: true
 materialious:
   enabled: false  # Set to true to deploy Materialious
 
-  # Resource limits for Materialious
+  # Optional resource limits for Materialious
+  # Uncomment and adjust based on your monitoring and requirements
   resources:
     requests:
       cpu: 100m
@@ -163,6 +210,21 @@ materialious:
     limits:
       cpu: 500m
       memory: 512Mi
+
+  # Optional health probes for Materialious
+  # Uncomment and adjust based on your requirements
+  # readinessProbe:
+  #   httpGet:
+  #     port: 80
+  #     path: /
+  #   initialDelaySeconds: 5
+  #   periodSeconds: 10
+  # livenessProbe:
+  #   httpGet:
+  #     port: 80
+  #     path: /
+  #   initialDelaySeconds: 15
+  #   periodSeconds: 30
 
   # Materialious environment configuration
   config:
@@ -187,3 +249,76 @@ materialious:
     # Default settings (JSON string)
     # See: https://github.com/Materialious/Materialious/blob/main/docs/SETTINGS.md
     VITE_DEFAULT_SETTINGS: '{"themeColor": "#2596be","region": "US"}'
+
+# Ingress configuration examples for external access
+ingress:
+  # Invidious ingress configuration
+  invidious:
+    enabled: true  # Enable ingress for Invidious
+    className: "nginx"  # Use nginx ingress controller
+
+    # Nginx ingress controller annotations
+    annotations:
+      kubernetes.io/ingress.class: nginx
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+      nginx.ingress.kubernetes.io/ssl-redirect: "true"
+      nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+      nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+      nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+      nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
+
+    hosts:
+      - host: invidious.yourdomain.com
+        paths:
+          - path: /
+            pathType: Prefix
+
+    # TLS configuration using externally created secret
+    tls:
+      - secretName: invidious-tls-secret  # Your existing TLS secret
+        hosts:
+          - invidious.yourdomain.com
+
+  # Materialious ingress configuration (optional frontend)
+  materialious:
+    enabled: false  # Set to true if you want to expose Materialious
+    className: "nginx"  # Use nginx ingress controller
+
+    # Nginx ingress controller annotations
+    annotations:
+      kubernetes.io/ingress.class: nginx
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+      nginx.ingress.kubernetes.io/ssl-redirect: "true"
+      nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+      nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+
+    hosts:
+      - host: materialious.yourdomain.com
+        paths:
+          - path: /
+            pathType: Prefix
+
+    # TLS configuration using externally created secret
+    tls:
+      - secretName: materialious-tls-secret  # Your existing TLS secret
+        hosts:
+          - materialious.yourdomain.com
+
+# Alternative Traefik ingress example (commented out)
+# ingress:
+#   invidious:
+#     enabled: true
+#     className: "traefik"
+#     annotations:
+#       traefik.ingress.kubernetes.io/router.tls: "true"
+#       cert-manager.io/cluster-issuer: letsencrypt-prod
+#       traefik.ingress.kubernetes.io/router.middlewares: default-secure-headers@kubernetescrd
+#     hosts:
+#       - host: invidious.yourdomain.com
+#         paths:
+#           - path: /
+#             pathType: Prefix
+#     tls:
+#       - secretName: invidious-tls-secret
+#         hosts:
+#           - invidious.yourdomain.com
