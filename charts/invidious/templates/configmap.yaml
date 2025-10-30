@@ -12,8 +12,8 @@ data:
     channel_threads: {{ .Values.config.channel_threads | default 1 }}
     feed_threads: {{ .Values.config.feed_threads | default 1 }}
     db:
-      user: {{ .Values.database.auth.username | default "kemal" }}
-      password: {{ .Values.database.auth.password | default "kemal" }}
+      user: {{ .Values.database.auth.username | default "dbusername" }}
+      password: {{ .Values.database.auth.password | default "dbpassword" }}
       {{- if .Values.database.internal.enabled }}
       host: {{ template "invidious.fullname" . }}-postgresql
       {{- else }}
