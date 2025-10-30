@@ -58,19 +58,17 @@ spec:
                 - ALL
             seccompProfile:
               type: RuntimeDefault
+          {{- if .Values.materialious.resources }}
           resources:
 {{ toYaml .Values.materialious.resources | indent 12 }}
+          {{- end }}
+          {{- if .Values.materialious.readinessProbe }}
           readinessProbe:
-            httpGet:
-              port: 80
-              path: /
-            initialDelaySeconds: 5
-            periodSeconds: 10
+{{ toYaml .Values.materialious.readinessProbe | indent 12 }}
+          {{- end }}
+          {{- if .Values.materialious.livenessProbe }}
           livenessProbe:
-            httpGet:
-              port: 80
-              path: /
-            initialDelaySeconds: 15
-            periodSeconds: 30
+{{ toYaml .Values.materialious.livenessProbe | indent 12 }}
+          {{- end }}
       restartPolicy: Always
 {{- end }}

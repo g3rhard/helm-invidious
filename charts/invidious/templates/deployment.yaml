@@ -28,12 +28,19 @@ spec:
         seccompProfile:
           type: {{ .Values.podSecurityContext.seccompProfile.type }}
       initContainers:
-        - name: wait-for-postgresql
+        - name: wait-for-database
           image: postgres:14
           args:
             - /bin/sh
             - -c
-            - until pg_isready -h {{ .Values.config.db.host }} -p {{ .Values.config.db.port }} -U {{ .Values.config.db.username }}; do echo waiting for database; sleep 2; done;
+            - |
+              {{- if .Values.database.internal.enabled }}
+              until pg_isready -h {{ template "invidious.fullname" . }}-postgresql -p 5432 -U {{ .Values.database.auth.username }}; do
+              {{- else }}
+              until pg_isready -h {{ .Values.database.external.host }} -p {{ .Values.database.external.port }} -U {{ .Values.database.auth.username }}; do
+              {{- end }}
+                echo "Waiting for database..."; sleep 2;
+              done;
       containers:
         - name: invidious
           image: "{{ .Values.images.invidious.registry }}/{{ .Values.images.invidious.image }}"
@@ -71,44 +78,4 @@ spec:
             periodSeconds: 30
             timeoutSeconds: 5
             failureThreshold: 2
-        - name: companion
-          image: "{{ .Values.images.companion.registry }}/{{ .Values.images.companion.image }}"
-          imagePullPolicy: {{ .Values.images.companion.pullPolicy }}
-          ports:
-            - containerPort: 8282
-          env:
-            - name: SERVER_SECRET_KEY
-              value: "{{ .Values.config.invidious_companion_key }}"
-          securityContext:
-            allowPrivilegeEscalation: false
-            runAsNonRoot: true
-            capabilities:
-              drop:
-                - ALL
-            readOnlyRootFilesystem: true
-          # resources:
-          #   limits:
-          #     cpu: "200m"
-          #     memory: "256Mi"
-          #   requests:
-          #     cpu: "100m"
-          #     memory: "128Mi"
-          volumeMounts:
-            - name: companion-cache
-              mountPath: /var/tmp/youtubei.js
-          # livenessProbe:
-          #   httpGet:
-          #     port: 8282
-          #     path: /
-          #   initialDelaySeconds: 30
-          #   periodSeconds: 30
-          # readinessProbe:
-          #   httpGet:
-          #     port: 8282
-          #     path: /
-          #   initialDelaySeconds: 5
-          #   periodSeconds: 10
-      volumes:
-        - name: companion-cache
-          emptyDir: {}
       restartPolicy: Always

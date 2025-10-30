@@ -1,0 +1,21 @@
+{{- if and .Values.database.internal.enabled .Values.database.internal.persistence.enabled }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ template "invidious.fullname" . }}-postgresql-data
+  labels:
+    app: {{ template "invidious.name" . }}-postgresql
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: {{ .Release.Name }}
+    component: postgresql
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.database.internal.persistence.size }}
+  {{- if .Values.database.internal.persistence.storageClass }}
+  storageClassName: {{ .Values.database.internal.persistence.storageClass }}
+  {{- end }}
+{{- end }}

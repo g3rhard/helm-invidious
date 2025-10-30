@@ -1,0 +1,67 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ template "invidious.fullname" . }}-companion
+  labels:
+    app: {{ template "invidious.name" . }}-companion
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: {{ .Release.Name }}
+    component: companion
+spec:
+  replicas: {{ .Values.companion.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ template "invidious.name" . }}-companion
+      release: {{ .Release.Name }}
+      component: companion
+  template:
+    metadata:
+      labels:
+        app: {{ template "invidious.name" . }}-companion
+        chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+        release: {{ .Release.Name }}
+        component: companion
+    spec:
+      securityContext:
+        runAsUser: {{ .Values.podSecurityContext.runAsUser }}
+        runAsGroup: {{ .Values.podSecurityContext.runAsGroup }}
+        fsGroup: {{ .Values.podSecurityContext.fsGroup }}
+        runAsNonRoot: {{ .Values.podSecurityContext.runAsNonRoot }}
+        seccompProfile:
+          type: {{ .Values.podSecurityContext.seccompProfile.type }}
+      containers:
+        - name: companion
+          image: "{{ .Values.images.companion.registry }}/{{ .Values.images.companion.image }}"
+          imagePullPolicy: {{ .Values.images.companion.pullPolicy }}
+          ports:
+            - containerPort: 8282
+          env:
+            - name: SERVER_SECRET_KEY
+              value: "{{ .Values.config.invidious_companion_key }}"
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+          {{- if .Values.companion.resources }}
+          resources:
+{{ toYaml .Values.companion.resources | indent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: companion-cache
+              mountPath: /var/tmp/youtubei.js
+          {{- if .Values.companion.livenessProbe }}
+          livenessProbe:
+{{ toYaml .Values.companion.livenessProbe | indent 12 }}
+          {{- end }}
+          {{- if .Values.companion.readinessProbe }}
+          readinessProbe:
+{{ toYaml .Values.companion.readinessProbe | indent 12 }}
+          {{- end }}
+      volumes:
+        - name: companion-cache
+          emptyDir: {}
+      restartPolicy: Always

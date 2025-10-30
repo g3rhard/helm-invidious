@@ -1,0 +1,97 @@
+{{- if .Values.database.internal.enabled }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ template "invidious.fullname" . }}-postgresql
+  labels:
+    app: {{ template "invidious.name" . }}-postgresql
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: {{ .Release.Name }}
+    component: postgresql
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: {{ template "invidious.name" . }}-postgresql
+      release: {{ .Release.Name }}
+      component: postgresql
+  template:
+    metadata:
+      labels:
+        app: {{ template "invidious.name" . }}-postgresql
+        chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+        release: {{ .Release.Name }}
+        component: postgresql
+    spec:
+      securityContext:
+        runAsUser: 999
+        runAsGroup: 999
+        fsGroup: 999
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: postgresql
+          image: "{{ .Values.database.internal.image.registry }}/{{ .Values.database.internal.image.repository }}:{{ .Values.database.internal.image.tag }}"
+          imagePullPolicy: {{ .Values.database.internal.image.pullPolicy }}
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_USER
+              value: {{ .Values.database.auth.username }}
+            - name: POSTGRES_PASSWORD
+              value: {{ .Values.database.auth.password }}
+            - name: POSTGRES_DB
+              value: {{ .Values.database.auth.database }}
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            capabilities:
+              drop:
+                - ALL
+            seccompProfile:
+              type: RuntimeDefault
+          volumeMounts:
+            - name: postgresql-data
+              mountPath: /var/lib/postgresql/data
+            - name: postgresql-init
+              mountPath: /docker-entrypoint-initdb.d
+              readOnly: true
+          {{- if .Values.database.internal.resources }}
+          resources:
+{{ toYaml .Values.database.internal.resources | indent 12 }}
+          {{- end }}
+          livenessProbe:
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - pg_isready -U {{ .Values.database.auth.username }} -d {{ .Values.database.auth.database }}
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          readinessProbe:
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - pg_isready -U {{ .Values.database.auth.username }} -d {{ .Values.database.auth.database }}
+            initialDelaySeconds: 5
+            periodSeconds: 10
+      volumes:
+        - name: postgresql-data
+          {{- if .Values.database.internal.persistence.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ template "invidious.fullname" . }}-postgresql-data
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
+        - name: postgresql-init
+          configMap:
+            name: {{ template "invidious.fullname" . }}-postgresql-init
+      restartPolicy: Always
+{{- end }}

@@ -1,5 +1,6 @@
 {{- range $svcName, $svcValues := .Values.services }}
 {{- if $svcValues.enabled }}
+{{- if or (ne $svcName "companion") (and (eq $svcName "companion") ($.Values.companion.enabled | default true)) }}
 ---
 apiVersion: v1
 kind: Service
@@ -20,12 +21,16 @@ spec:
     {{- if eq $svcName "materialious" }}
     app: {{ include "invidious.name" $ }}-materialious
     component: materialious
+    {{- else if eq $svcName "companion" }}
+    app: {{ include "invidious.name" $ }}-companion
+    component: companion
     {{- else }}
     app: {{ include "invidious.name" $ }}
     {{- end }}
     release: {{ $.Release.Name }}
 {{- if $svcValues.loadBalancerIP }}
   loadBalancerIP: {{ $svcValues.loadBalancerIP }}
+{{- end }}
 {{- end }}
 {{- end }}
 {{- end }}

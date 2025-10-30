@@ -1,0 +1,99 @@
+{{- if .Values.ingress.invidious.enabled }}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ template "invidious.fullname" . }}-invidious
+  labels:
+    app: {{ template "invidious.name" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: {{ .Release.Name }}
+    component: invidious
+  {{- with .Values.ingress.invidious.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if .Values.ingress.invidious.className }}
+  ingressClassName: {{ .Values.ingress.invidious.className }}
+  {{- end }}
+  {{- if .Values.ingress.invidious.tls }}
+  tls:
+    {{- range .Values.ingress.invidious.tls }}
+    - hosts:
+        {{- range .hosts }}
+        - {{ . | quote }}
+        {{- end }}
+      secretName: {{ .secretName }}
+    {{- end }}
+  {{- end }}
+  rules:
+    {{- range .Values.ingress.invidious.hosts }}
+    - host: {{ .host | quote }}
+      http:
+        paths:
+          {{- range .paths }}
+          - path: {{ .path }}
+            {{- if .pathType }}
+            pathType: {{ .pathType }}
+            {{- else }}
+            pathType: Prefix
+            {{- end }}
+            backend:
+              service:
+                name: {{ template "invidious.fullname" $ }}-invidious
+                port:
+                  number: {{ $.Values.services.invidious.port }}
+          {{- end }}
+    {{- end }}
+{{- end }}
+
+{{- if and .Values.materialious.enabled .Values.ingress.materialious.enabled }}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ template "invidious.fullname" . }}-materialious
+  labels:
+    app: {{ template "invidious.name" . }}-materialious
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: {{ .Release.Name }}
+    component: materialious
+  {{- with .Values.ingress.materialious.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if .Values.ingress.materialious.className }}
+  ingressClassName: {{ .Values.ingress.materialious.className }}
+  {{- end }}
+  {{- if .Values.ingress.materialious.tls }}
+  tls:
+    {{- range .Values.ingress.materialious.tls }}
+    - hosts:
+        {{- range .hosts }}
+        - {{ . | quote }}
+        {{- end }}
+      secretName: {{ .secretName }}
+    {{- end }}
+  {{- end }}
+  rules:
+    {{- range .Values.ingress.materialious.hosts }}
+    - host: {{ .host | quote }}
+      http:
+        paths:
+          {{- range .paths }}
+          - path: {{ .path }}
+            {{- if .pathType }}
+            pathType: {{ .pathType }}
+            {{- else }}
+            pathType: Prefix
+            {{- end }}
+            backend:
+              service:
+                name: {{ template "invidious.fullname" $ }}-materialious
+                port:
+                  number: {{ $.Values.services.materialious.port }}
+          {{- end }}
+    {{- end }}
+{{- end }}

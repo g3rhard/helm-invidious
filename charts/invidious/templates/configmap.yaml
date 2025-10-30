@@ -12,11 +12,15 @@ data:
     channel_threads: {{ .Values.config.channel_threads | default 1 }}
     feed_threads: {{ .Values.config.feed_threads | default 1 }}
     db:
-      user: {{ .Values.postgresql.auth.username | default "kemal" }}
-      password: {{ .Values.postgresql.auth.password | default "kemal" }}
+      user: {{ .Values.database.auth.username | default "kemal" }}
+      password: {{ .Values.database.auth.password | default "kemal" }}
+      {{- if .Values.database.internal.enabled }}
       host: {{ template "invidious.fullname" . }}-postgresql
-      port: 5432
-      dbname: {{ .Values.postgresql.auth.database | default "invidious" }}
+      {{- else }}
+      host: {{ .Values.database.external.host }}
+      {{- end }}
+      port: {{ .Values.database.external.port | default 5432 }}
+      dbname: {{ .Values.database.auth.database | default "invidious" }}
     check_tables: {{ .Values.config.check_tables | default true }}
     full_refresh: {{ .Values.config.full_refresh | default false }}
     https_only: {{ .Values.config.https_only | default false }}
@@ -27,13 +31,17 @@ data:
     external_port: {{ .Values.config.external_port }}
     {{- end }}
     # CRITICAL: Must be set to a random value
-    hmac_key: {{ .Values.config.hmac_key | default "CHANGE_ME_GENERATE_RANDOM_20_CHARS" }}
+    hmac_key: {{ .Values.config.hmac_key | default "CHANGE_ME_GENERATE_RANDOM_16_CHARS" }}
     # Performance optimizations for public instances
     use_pubsub_feeds: {{ .Values.config.use_pubsub_feeds | default true }}
     use_innertube_for_captions: {{ .Values.config.use_innertube_for_captions | default true }}
     invidious_companion:
       # Private URL for internal communication
+      {{- if .Values.companion.enabled }}
+      - private_url: {{ .Values.config.invidious_companion.private_url | default (printf "http://%s-companion:8282/companion" (include "invidious.fullname" .)) }}
+      {{- else }}
       - private_url: {{ .Values.config.invidious_companion.private_url | default "http://companion:8282/companion" }}
+      {{- end }}
       {{- if .Values.config.invidious_companion.public_url }}
       # Optional: Public URL for direct access via reverse proxy
       - public_url: {{ .Values.config.invidious_companion.public_url }}
