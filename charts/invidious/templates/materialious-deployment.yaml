@@ -37,6 +37,8 @@ spec:
           env:
             - name: VITE_DEFAULT_INVIDIOUS_INSTANCE
               value: {{ .Values.materialious.config.VITE_DEFAULT_INVIDIOUS_INSTANCE | default (printf "http://%s-invidious:3000" (include "invidious.fullname" .)) }}
+            - name: VITE_DEFAULT_COMPANION_INSTANCE
+              value: {{ .Values.materialious.config.VITE_DEFAULT_INVIDIOUS_INSTANCE | default (printf "http://%s-companion:8282" (include "invidious.fullname" .)) }}
             - name: VITE_DEFAULT_RETURNYTDISLIKES_INSTANCE
               value: {{ .Values.materialious.config.VITE_DEFAULT_RETURNYTDISLIKES_INSTANCE }}
             - name: VITE_DEFAULT_SPONSERBLOCK_INSTANCE
