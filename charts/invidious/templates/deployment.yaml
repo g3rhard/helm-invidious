@@ -20,13 +20,10 @@ spec:
         chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
         release: {{ .Release.Name }}
     spec:
+      {{- if .Values.podSecurityContext }}
       securityContext:
-        runAsUser: {{ .Values.podSecurityContext.runAsUser }}
-        runAsGroup: {{ .Values.podSecurityContext.runAsGroup }}
-        fsGroup: {{ .Values.podSecurityContext.fsGroup }}
-        runAsNonRoot: {{ .Values.podSecurityContext.runAsNonRoot }}
-        seccompProfile:
-          type: {{ .Values.podSecurityContext.seccompProfile.type }}
+{{ toYaml .Values.podSecurityContext | indent 8 }}
+      {{- end }}
       initContainers:
         - name: wait-for-database
           image: postgres:14
@@ -53,14 +50,10 @@ spec:
                 configMapKeyRef:
                   key: INVIDIOUS_CONFIG
                   name: {{ template "invidious.fullname" . }}
+          {{- if .Values.securityContext }}
           securityContext:
-            allowPrivilegeEscalation: {{ .Values.securityContext.allowPrivilegeEscalation }}
-            runAsNonRoot: {{ .Values.securityContext.runAsNonRoot }}
-            capabilities:
-              drop:
-                - ALL
-            seccompProfile:
-              type: {{ .Values.securityContext.seccompProfile.type }}
+{{ toYaml .Values.securityContext | indent 12 }}
+          {{- end }}
           resources:
 {{ toYaml .Values.resources | indent 12 }}
           readinessProbe:

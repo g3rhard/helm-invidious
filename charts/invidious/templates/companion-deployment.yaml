@@ -23,13 +23,10 @@ spec:
         release: {{ .Release.Name }}
         component: companion
     spec:
+      {{- if .Values.podSecurityContext }}
       securityContext:
-        runAsUser: {{ .Values.podSecurityContext.runAsUser }}
-        runAsGroup: {{ .Values.podSecurityContext.runAsGroup }}
-        fsGroup: {{ .Values.podSecurityContext.fsGroup }}
-        runAsNonRoot: {{ .Values.podSecurityContext.runAsNonRoot }}
-        seccompProfile:
-          type: {{ .Values.podSecurityContext.seccompProfile.type }}
+{{ toYaml .Values.podSecurityContext | indent 8 }}
+      {{- end }}
       containers:
         - name: companion
           image: "{{ .Values.images.companion.registry }}/{{ .Values.images.companion.image }}"
@@ -39,13 +36,10 @@ spec:
           env:
             - name: SERVER_SECRET_KEY
               value: "{{ .Values.config.invidious_companion_key }}"
+          {{- if .Values.securityContext }}
           securityContext:
-            allowPrivilegeEscalation: false
-            runAsNonRoot: true
-            capabilities:
-              drop:
-                - ALL
-            readOnlyRootFilesystem: true
+{{ toYaml .Values.securityContext | indent 12 }}
+          {{- end }}
           {{- if .Values.companion.resources }}
           resources:
 {{ toYaml .Values.companion.resources | indent 12 }}

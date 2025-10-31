@@ -1,34 +1,31 @@
-{{- range $svcName, $svcValues := .Values.services }}
-{{- if $svcValues.enabled }}
+{{- range $svcName, $svcConfig := .Values.services }}
+{{- if $svcConfig.enabled }}
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ printf "%s-%s" (include "invidious.fullname" $) $svcName }}
+  name: {{ include "invidious.fullname" $ }}-{{ $svcName }}
   labels:
     app: {{ include "invidious.name" $ }}
     chart: {{ $.Chart.Name }}
     release: {{ $.Release.Name }}
     service: {{ $svcName }}
 spec:
-  type: {{ $svcValues.type }}
+  type: {{ $svcConfig.type }}
   ports:
     - name: http
-      port: {{ $svcValues.port }}
-      targetPort: {{ $svcValues.port }}
+      port: {{ $svcConfig.port }}
+      targetPort: {{ $svcConfig.port }}
   selector:
-    {{- if eq $svcName "materialious" }}
-    app: {{ include "invidious.name" $ }}-materialious
-    component: materialious
-    {{- else if eq $svcName "companion" }}
-    app: {{ include "invidious.name" $ }}-companion
-    component: companion
+    {{- if ne $svcName "invidious" }}
+    app: {{ include "invidious.name" $ }}-{{ $svcName }}
+    component: {{ $svcName }}
     {{- else }}
     app: {{ include "invidious.name" $ }}
     {{- end }}
     release: {{ $.Release.Name }}
-{{- if $svcValues.loadBalancerIP }}
-  loadBalancerIP: {{ $svcValues.loadBalancerIP }}
-{{- end }}
+  {{- if $svcConfig.loadBalancerIP }}
+  loadBalancerIP: {{ $svcConfig.loadBalancerIP }}
+  {{- end }}
 {{- end }}
 {{- end }}

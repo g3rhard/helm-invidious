@@ -24,13 +24,10 @@ spec:
         release: {{ .Release.Name }}
         component: materialious
     spec:
+      {{- if .Values.podSecurityContext }}
       securityContext:
-        runAsUser: {{ .Values.podSecurityContext.runAsUser }}
-        runAsGroup: {{ .Values.podSecurityContext.runAsGroup }}
-        fsGroup: {{ .Values.podSecurityContext.fsGroup }}
-        runAsNonRoot: {{ .Values.podSecurityContext.runAsNonRoot }}
-        seccompProfile:
-          type: {{ .Values.podSecurityContext.seccompProfile.type }}
+{{ toYaml .Values.podSecurityContext | indent 8 }}
+      {{- end }}
       containers:
         - name: materialious
           image: "{{ .Values.images.materialious.registry }}/{{ .Values.images.materialious.image }}"
@@ -50,14 +47,10 @@ spec:
               value: {{ .Values.materialious.config.VITE_DEFAULT_DEARROW_THUMBNAIL_INSTANCE }}
             - name: VITE_DEFAULT_SETTINGS
               value: {{ .Values.materialious.config.VITE_DEFAULT_SETTINGS | quote }}
+          {{- if .Values.securityContext }}
           securityContext:
-            allowPrivilegeEscalation: false
-            runAsNonRoot: true
-            capabilities:
-              drop:
-                - ALL
-            seccompProfile:
-              type: RuntimeDefault
+{{ toYaml .Values.securityContext | indent 12 }}
+          {{- end }}
           {{- if .Values.materialious.resources }}
           resources:
 {{ toYaml .Values.materialious.resources | indent 12 }}

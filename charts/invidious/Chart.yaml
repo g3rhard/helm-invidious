@@ -2,7 +2,7 @@
 apiVersion: v2
 name: invidious
 description: Invidious is an alternative front-end to YouTube
-version: 2.0.0
+version: 2.0.1
 appVersion: latest
 keywords:
 - youtube

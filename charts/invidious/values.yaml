@@ -48,23 +48,29 @@ resources:
     cpu: 2000m
     memory: 4Gi
 
-securityContext:
-  allowPrivilegeEscalation: false
-  runAsUser: 1000
-  runAsGroup: 1000
-  fsGroup: 1000
-  runAsNonRoot: true
-  seccompProfile:
-    type: RuntimeDefault
+# Security configuration
+# Uncomment to enable security hardening features
+# securityContext:
+#   allowPrivilegeEscalation: false
+#   runAsUser: 1000
+#   runAsGroup: 1000
+#   fsGroup: 1000
+#   runAsNonRoot: true
+#   capabilities:
+#     drop:
+#       - ALL
+#   seccompProfile:
+#     type: RuntimeDefault
 
-# Pod security context
-podSecurityContext:
-  runAsUser: 1000
-  runAsGroup: 1000
-  fsGroup: 1000
-  runAsNonRoot: true
-  seccompProfile:
-    type: RuntimeDefault
+# # Pod security context
+# # Uncomment to enable pod-level security hardening
+# podSecurityContext:
+#   runAsUser: 1000
+#   runAsGroup: 1000
+#   fsGroup: 1000
+#   runAsNonRoot: true
+#   seccompProfile:
+#     type: RuntimeDefault
 
 # Database configuration
 database:
@@ -106,22 +112,25 @@ config:
   channel_threads: 1
   feed_threads: 1
   db:
+    username: dbusername
+    password: dbpassword
     host: invidious-postgresql
     port: 5432
+    dbname: invidious
   check_tables: true
   full_refresh: false
   https_only: false
-  domain:
+  domain: ""
   # CRITICAL: Generate using: pwgen 16 1
   hmac_key: CHANGE_ME_GENERATE_RANDOM_16_CHARS
   # Performance optimizations for public instances
   use_pubsub_feeds: true
   use_innertube_for_captions: true
   invidious_companion:
-  #   # Internal URL for communication between invidious and companion
-  #   private_url: "http://companion:8282/companion"
-  #   # Optional: public_url for direct companion access via reverse proxy
-  #   # public_url: "https://MYDOMAIN/companion"
+    # Internal URL for communication between invidious and companion
+    private_url: "http://companion:8282/companion"
+    # Optional: public_url for direct companion access via reverse proxy
+    # public_url: "https://MYDOMAIN/companion"
   # CRITICAL: Generate a different key than hmac_key using: pwgen 16 1
   invidious_companion_key: CHANGE_ME_GENERATE_RANDOM_16_CHARS
 
@@ -242,28 +251,28 @@ ingress:
   # Materialious ingress configuration (optional)
   materialious:
     enabled: false  # Set to true to enable ingress for Materialious
-    # className: ""   # Specify ingress class (e.g., "nginx", "traefik")
+    className: ""   # Specify ingress class (e.g., "nginx", "traefik")
 
-    # # Ingress annotations (controller-specific)
-    # annotations: {}
-    #   # For nginx ingress controller:
-    #   # kubernetes.io/ingress.class: nginx
-    #   # cert-manager.io/cluster-issuer: letsencrypt-prod
-    #   # nginx.ingress.kubernetes.io/ssl-redirect: "true"
-    #   # nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    # Ingress annotations (controller-specific)
+    annotations: {}
+      # For nginx ingress controller:
+      # kubernetes.io/ingress.class: nginx
+      # cert-manager.io/cluster-issuer: letsencrypt-prod
+      # nginx.ingress.kubernetes.io/ssl-redirect: "true"
+      # nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
 
-    #   # For Traefik ingress controller:
-    #   # traefik.ingress.kubernetes.io/router.tls: "true"
-    #   # cert-manager.io/cluster-issuer: letsencrypt-prod
+      # For Traefik ingress controller:
+      # traefik.ingress.kubernetes.io/router.tls: "true"
+      # cert-manager.io/cluster-issuer: letsencrypt-prod
 
-    # hosts:
-    #   - host: materialious.example.com
-    #     paths:
-    #       - path: /
-    #         pathType: Prefix
+    hosts:
+      - host: materialious.example.com
+        paths:
+          - path: /
+            pathType: Prefix
 
-    # # TLS configuration using externally created secret
-    # tls:
-    #   - secretName: materialious-tls-secret  # Name of your existing TLS secret
-    #     hosts:
-    #       - materialious.example.com
+    # TLS configuration using externally created secret
+    tls:
+      - secretName: materialious-tls-secret  # Name of your existing TLS secret
+        hosts:
+          - materialious.example.com

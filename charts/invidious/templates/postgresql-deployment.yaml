@@ -26,13 +26,20 @@ spec:
         release: {{ .Release.Name }}
         component: postgresql
     spec:
+      {{- if .Values.podSecurityContext }}
       securityContext:
+        # PostgreSQL requires specific user/group (999)
         runAsUser: 999
         runAsGroup: 999
         fsGroup: 999
-        runAsNonRoot: true
+        {{- with .Values.podSecurityContext }}
+        runAsNonRoot: {{ .runAsNonRoot | default true }}
+        {{- if .seccompProfile }}
         seccompProfile:
-          type: RuntimeDefault
+          type: {{ .seccompProfile.type }}
+        {{- end }}
+        {{- end }}
+      {{- end }}
       containers:
         - name: postgresql
           image: "{{ .Values.database.internal.image.registry }}/{{ .Values.database.internal.image.repository }}:{{ .Values.database.internal.image.tag }}"
@@ -48,14 +55,10 @@ spec:
               value: {{ .Values.database.auth.database }}
             - name: PGDATA
               value: /var/lib/postgresql/data/pgdata
+          {{- if .Values.securityContext }}
           securityContext:
-            allowPrivilegeEscalation: false
-            runAsNonRoot: true
-            capabilities:
-              drop:
-                - ALL
-            seccompProfile:
-              type: RuntimeDefault
+{{ toYaml .Values.securityContext | indent 12 }}
+          {{- end }}
           volumeMounts:
             - name: postgresql-data
               mountPath: /var/lib/postgresql/data
