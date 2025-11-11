@@ -56,19 +56,19 @@ spec:
           {{- end }}
           resources:
 {{ toYaml .Values.resources | indent 12 }}
-          readinessProbe:
-            httpGet:
-              port: 3000
-              path: /api/v1/trending
-            initialDelaySeconds: 10
-            periodSeconds: 10
-            timeoutSeconds: 5
-          livenessProbe:
-            httpGet:
-              port: 3000
-              path: /api/v1/trending
-            initialDelaySeconds: 30
-            periodSeconds: 30
-            timeoutSeconds: 5
-            failureThreshold: 2
+          # readinessProbe:
+          #   httpGet:
+          #     port: 3000
+          #     path: /api/v1/trending
+          #   initialDelaySeconds: 10
+          #   periodSeconds: 10
+          #   timeoutSeconds: 5
+          # livenessProbe:
+          #   httpGet:
+          #     port: 3000
+          #     path: /api/v1/trending
+          #   initialDelaySeconds: 30
+          #   periodSeconds: 30
+          #   timeoutSeconds: 5
+          #   failureThreshold: 2
       restartPolicy: Always
