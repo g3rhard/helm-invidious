@@ -95,7 +95,7 @@ database:
     # Persistence configuration
     persistence:
       enabled: true
-      size: 20Gi
+      size: 5Gi
       # storageClass: ""
 
   # Database authentication (used for both internal and external)
