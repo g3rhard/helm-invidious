@@ -80,7 +80,7 @@ database:
     image:
       registry: docker.io
       repository: postgres
-      tag: "14"
+      tag: "18"
       pullPolicy: IfNotPresent
 
     # Resource recommendations from documentation
