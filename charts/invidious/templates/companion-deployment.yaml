@@ -1,3 +1,4 @@
+{{- if .Values.companion.enabled }}
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -9,7 +10,7 @@ metadata:
     release: {{ .Release.Name }}
     component: companion
 spec:
-  replicas: {{ .Values.companion.replicaCount }}
+  replicas: {{ .Values.companion.replicaCount | default 1 }}
   selector:
     matchLabels:
       app: {{ template "invidious.name" . }}-companion
@@ -59,3 +60,4 @@ spec:
         - name: companion-cache
           emptyDir: {}
       restartPolicy: Always
+{{- end }}

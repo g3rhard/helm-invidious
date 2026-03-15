@@ -39,38 +39,41 @@ services:
     port: 80
     #loadBalancerIP:
 
-# Resource recommendations based on documentation
-resources:
-  requests:
-    cpu: 500m
-    memory: 1Gi
-  limits:
-    cpu: 2000m
-    memory: 4Gi
+# Resource configuration for Invidious pods
+# Set to non-empty to apply resource requests/limits
+# Example:
+#   requests:
+#     cpu: 500m
+#     memory: 1Gi
+#   limits:
+#     cpu: 2000m
+#     memory: 4Gi
+resources: {}
 
-# Security configuration
-# Uncomment to enable security hardening features
-# securityContext:
+# Security context for containers
+# Set to non-empty to apply container-level security hardening
+# Example:
 #   allowPrivilegeEscalation: false
 #   runAsUser: 1000
 #   runAsGroup: 1000
-#   fsGroup: 1000
 #   runAsNonRoot: true
 #   capabilities:
 #     drop:
 #       - ALL
 #   seccompProfile:
 #     type: RuntimeDefault
+securityContext: {}
 
-# # Pod security context
-# # Uncomment to enable pod-level security hardening
-# podSecurityContext:
+# Pod security context
+# Set to non-empty to apply pod-level security hardening
+# Example:
 #   runAsUser: 1000
 #   runAsGroup: 1000
 #   fsGroup: 1000
 #   runAsNonRoot: true
 #   seccompProfile:
 #     type: RuntimeDefault
+podSecurityContext: {}
 
 # Database configuration
 database:
@@ -83,20 +86,22 @@ database:
       tag: "18"
       pullPolicy: IfNotPresent
 
-    # Resource recommendations from documentation
-    resources:
-      requests:
-        memory: 2Gi
-        cpu: 500m
-      limits:
-        memory: 4Gi
-        cpu: 2000m
-
     # Persistence configuration
     persistence:
       enabled: true
       size: 5Gi
       # storageClass: ""
+
+    # Resource configuration for PostgreSQL
+    # Set to non-empty to apply resource requests/limits
+    # Example:
+    #   requests:
+    #     memory: 2Gi
+    #     cpu: 500m
+    #   limits:
+    #     memory: 4Gi
+    #     cpu: 2000m
+    resources: {}
 
   # Database authentication (used for both internal and external)
   auth:
@@ -108,6 +113,7 @@ database:
   external:
     host: ""
     port: 5432 # Adapted from ../config/config.yml
+
 config:
   channel_threads: 1
   feed_threads: 1
@@ -137,6 +143,7 @@ config:
 # Companion configuration
 companion:
   enabled: true  # Set to false if using external companion
+  replicaCount: 1
 
   # Optional resource allocation for companion
   # Uncomment and adjust based on your needs
