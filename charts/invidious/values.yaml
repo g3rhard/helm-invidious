@@ -29,12 +29,12 @@ services:
     port: 3000
     #loadBalancerIP:
   companion:
-    enabled: true  # Set to false if using external companion
+    enabled: true # Set to false if using external companion
     type: ClusterIP
     port: 8282
     #loadBalancerIP:
   materialious:
-    enabled: false  # Set to true to enable Materialious frontend
+    enabled: false # Set to true to enable Materialious frontend
     type: ClusterIP
     port: 80
     #loadBalancerIP:
@@ -142,7 +142,7 @@ config:
 
 # Companion configuration
 companion:
-  enabled: true  # Set to false if using external companion
+  enabled: true # Set to false if using external companion
   replicaCount: 1
 
   # Optional resource allocation for companion
@@ -173,7 +173,7 @@ companion:
 # Materialious configuration (optional modern material design frontend)
 # Enable by setting services.materialious.enabled: true
 materialious:
-  enabled: false  # Set to true to deploy Materialious
+  enabled: false # Set to true to deploy Materialious
 
   # Optional resource limits for Materialious
   # Uncomment and adjust based on your needs
@@ -228,8 +228,8 @@ materialious:
 ingress:
   # Invidious ingress configuration
   invidious:
-    enabled: false  # Set to true to enable ingress for Invidious
-    className: ""   # Specify ingress class (e.g., "nginx", "traefik")
+    enabled: false # Set to true to enable ingress for Invidious
+    className: "" # Specify ingress class (e.g., "nginx", "traefik")
 
     # Ingress annotations (controller-specific)
     annotations: {}
@@ -251,14 +251,14 @@ ingress:
 
     # TLS configuration using externally created secret
     tls:
-      - secretName: invidious-tls-secret  # Name of your existing TLS secret
+      - secretName: invidious-tls-secret # Name of your existing TLS secret
         hosts:
           - invidious.example.com
 
   # Materialious ingress configuration (optional)
   materialious:
-    enabled: false  # Set to true to enable ingress for Materialious
-    className: ""   # Specify ingress class (e.g., "nginx", "traefik")
+    enabled: false # Set to true to enable ingress for Materialious
+    className: "" # Specify ingress class (e.g., "nginx", "traefik")
 
     # Ingress annotations (controller-specific)
     annotations: {}
@@ -280,6 +280,6 @@ ingress:
 
     # TLS configuration using externally created secret
     tls:
-      - secretName: materialious-tls-secret  # Name of your existing TLS secret
+      - secretName: materialious-tls-secret # Name of your existing TLS secret
         hosts:
           - materialious.example.com

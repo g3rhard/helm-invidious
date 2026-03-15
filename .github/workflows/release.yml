@@ -3,7 +3,7 @@ name: Release Charts
 on:
   push:
     tags:
-      - '*'
+      - "*"
 
 jobs:
   release:
@@ -23,10 +23,6 @@ jobs:
 
       - name: Install Helm
         uses: azure/setup-helm@v4
-
-      - name: Add repos to Helm
-        run: |
-          helm repo add bitnami https://charts.bitnami.com/bitnami
 
       - name: Run chart-releaser
         uses: helm/chart-releaser-action@v1.7.0

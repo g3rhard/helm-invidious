@@ -33,12 +33,12 @@ services:
     port: 3000
     #loadBalancerIP:
   companion:
-    enabled: true  # Set to false if using external companion
+    enabled: true # Set to false if using external companion
     type: ClusterIP
     port: 8282
     #loadBalancerIP:
   materialious:
-    enabled: false  # Set to true to enable Materialious frontend
+    enabled: false # Set to true to enable Materialious frontend
     type: ClusterIP
     port: 80
     #loadBalancerIP:
@@ -81,7 +81,7 @@ database:
     image:
       registry: docker.io
       repository: postgres
-      tag: "14"
+      tag: "18"
       pullPolicy: IfNotPresent
 
     # Resource recommendations from documentation
@@ -199,7 +199,7 @@ companion:
 # Materialious configuration (optional modern material design frontend)
 # Enable by setting services.materialious.enabled: true
 materialious:
-  enabled: false  # Set to true to deploy Materialious
+  enabled: false # Set to true to deploy Materialious
 
   # Optional resource limits for Materialious
   # Uncomment and adjust based on your monitoring and requirements
@@ -254,8 +254,8 @@ materialious:
 ingress:
   # Invidious ingress configuration
   invidious:
-    enabled: true  # Enable ingress for Invidious
-    className: "nginx"  # Use nginx ingress controller
+    enabled: true # Enable ingress for Invidious
+    className: "nginx" # Use nginx ingress controller
 
     # Nginx ingress controller annotations
     annotations:
@@ -275,14 +275,14 @@ ingress:
 
     # TLS configuration using externally created secret
     tls:
-      - secretName: invidious-tls-secret  # Your existing TLS secret
+      - secretName: invidious-tls-secret # Your existing TLS secret
         hosts:
           - invidious.yourdomain.com
 
   # Materialious ingress configuration (optional frontend)
   materialious:
-    enabled: false  # Set to true if you want to expose Materialious
-    className: "nginx"  # Use nginx ingress controller
+    enabled: false # Set to true if you want to expose Materialious
+    className: "nginx" # Use nginx ingress controller
 
     # Nginx ingress controller annotations
     annotations:
@@ -300,7 +300,7 @@ ingress:
 
     # TLS configuration using externally created secret
     tls:
-      - secretName: materialious-tls-secret  # Your existing TLS secret
+      - secretName: materialious-tls-secret # Your existing TLS secret
         hosts:
           - materialious.yourdomain.com
 
