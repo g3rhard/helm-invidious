@@ -3,6 +3,27 @@ entries:
   invidious:
   - apiVersion: v2
     appVersion: latest
+    created: "2026-03-15T21:18:54.675503408Z"
+    description: Invidious is an alternative front-end to YouTube
+    digest: 433446680b49355aab35d42affa77bf53d8f9fa6364563a57ba2c87c965af8e6
+    home: https://invidio.us/
+    icon: https://raw.githubusercontent.com/iv-org/invidious/05988c1c49851b7d0094fca16aeaf6382a7f64ab/assets/favicon-32x32.png
+    keywords:
+    - youtube
+    - proxy
+    - video
+    - privacy
+    maintainers:
+    - email: mail@leonklingele.de
+      name: Leon Klingele
+    name: invidious
+    sources:
+    - https://github.com/iv-org/invidious
+    urls:
+    - https://github.com/g3rhard/helm-invidious/releases/download/invidious-2.0.4/invidious-2.0.4.tgz
+    version: 2.0.4
+  - apiVersion: v2
+    appVersion: latest
     created: "2025-11-04T05:46:26.919322689Z"
     description: Invidious is an alternative front-end to YouTube
     digest: c3829384113cea2aff93b29b217572929f774bfa6e363d91831d170178843259
@@ -22,4 +43,4 @@ entries:
     urls:
     - https://github.com/g3rhard/helm-invidious/releases/download/invidious-2.0.2/invidious-2.0.2.tgz
     version: 2.0.2
-generated: "2025-11-04T05:46:26.919332327Z"
+generated: "2026-03-15T21:18:54.675510324Z"
