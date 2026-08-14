@@ -1,7 +1,8 @@
 # helm-invidious
 
 [![Helm](https://img.shields.io/badge/Helm-Chart-0F1689?style=for-the-badge&logo=helm&color=333333)](https://helm.sh/)
-[![Release](https://img.shields.io/github/actions/workflow/status/g3rhard/helm-invidious/release.yml?branch=production&style=for-the-badge&logo=githubactions&label=Release&color=333333)](https://github.com/g3rhard/helm-invidious/actions/workflows/release.yml)
+[![Release](https://img.shields.io/github/actions/workflow/status/g3rhard/helm-invidious/release.yml?style=for-the-badge&logo=githubactions&label=Release)](https://github.com/g3rhard/helm-invidious/actions/workflows/release.yml)
+[![GitHub Pages](https://img.shields.io/badge/GitHub_Pages-Helm_Repository-222222?style=for-the-badge&logo=githubpages)](https://g3rhard.cc/helm-invidious/index.yaml)
 [![Version](https://img.shields.io/github/v/release/g3rhard/helm-invidious?style=for-the-badge&logo=github&color=333333)](https://github.com/g3rhard/helm-invidious/releases/latest)
 
 Deploy [Invidious] to Kubernetes with PostgreSQL and Invidious companion.
