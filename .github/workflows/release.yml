@@ -9,6 +9,7 @@ jobs:
   release:
     permissions:
       contents: write
+      packages: write
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -23,6 +24,22 @@ jobs:
 
       - name: Install Helm
         uses: azure/setup-helm@v4
+
+      - name: Log in to GitHub Container Registry
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          printf '%s' "$GH_TOKEN" | helm registry login ghcr.io \
+            --username "$GITHUB_ACTOR" \
+            --password-stdin
+
+      - name: Publish chart to GitHub Packages
+        run: |
+          package_dir="$RUNNER_TEMP/helm-packages"
+          mkdir -p "$package_dir"
+          helm package charts/invidious --destination "$package_dir"
+          package_path="$(find "$package_dir" -name 'invidious-*.tgz' -print -quit)"
+          helm push "$package_path" oci://ghcr.io/g3rhard/charts
 
       - name: Run chart-releaser
         uses: helm/chart-releaser-action@v1.7.0

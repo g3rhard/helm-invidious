@@ -1,4 +1,6 @@
-{{- if .Values.companion.enabled }}
+{{- $companion := .Values.companion | default dict }}
+{{- $companionEnabled := dig "enabled" (.Values.services.companion.enabled | default false) $companion }}
+{{- if $companionEnabled }}
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -10,7 +12,7 @@ metadata:
     release: {{ .Release.Name }}
     component: companion
 spec:
-  replicas: {{ .Values.companion.replicaCount | default 1 }}
+  replicas: {{ dig "replicaCount" 1 $companion }}
   selector:
     matchLabels:
       app: {{ template "invidious.name" . }}-companion
@@ -36,25 +38,28 @@ spec:
             - containerPort: 8282
           env:
             - name: SERVER_SECRET_KEY
-              value: "{{ .Values.config.invidious_companion_key }}"
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secret.name }}
+                  key: {{ .Values.secret.keys.companionKey }}
           {{- if .Values.securityContext }}
           securityContext:
 {{ toYaml .Values.securityContext | indent 12 }}
           {{- end }}
-          {{- if .Values.companion.resources }}
+          {{- if get $companion "resources" }}
           resources:
-{{ toYaml .Values.companion.resources | indent 12 }}
+{{ toYaml (get $companion "resources") | indent 12 }}
           {{- end }}
           volumeMounts:
             - name: companion-cache
               mountPath: /var/tmp/youtubei.js
-          {{- if .Values.companion.livenessProbe }}
+          {{- if get $companion "livenessProbe" }}
           livenessProbe:
-{{ toYaml .Values.companion.livenessProbe | indent 12 }}
+{{ toYaml (get $companion "livenessProbe") | indent 12 }}
           {{- end }}
-          {{- if .Values.companion.readinessProbe }}
+          {{- if get $companion "readinessProbe" }}
           readinessProbe:
-{{ toYaml .Values.companion.readinessProbe | indent 12 }}
+{{ toYaml (get $companion "readinessProbe") | indent 12 }}
           {{- end }}
       volumes:
         - name: companion-cache

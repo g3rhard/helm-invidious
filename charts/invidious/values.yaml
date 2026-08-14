@@ -3,8 +3,8 @@ name: invidious
 images:
   invidious:
     registry: quay.io
-    image: invidious/invidious:latest
-    pullPolicy: Always
+    image: invidious/invidious:2.20260723.0
+    pullPolicy: IfNotPresent
   companion:
     registry: quay.io
     image: invidious/invidious-companion:latest
@@ -15,6 +15,23 @@ images:
     pullPolicy: Always
 
 replicaCount: 1
+
+# Existing Kubernetes Secret consumed directly by the Deployments. The chart
+# does not create or encrypt secrets.
+secret:
+  name: invidious-secrets
+  keys:
+    # Generate a database password with: openssl rand -hex 32
+    databaseUsername: db_user
+    databasePassword: db_password
+    # Generate independent HMAC and companion keys with: pwgen 16 1
+    hmacKey: hmac_key
+    # po_token and visitor_data are a related pair; obtain them together using
+    # the current upstream Invidious/companion instructions, not randomly.
+    poToken: po_token
+    visitorData: visitor_data
+    # Must refer to a value exactly 16 characters long.
+    companionKey: invidious_companion_key
 
 autoscaling:
   enabled: false
@@ -49,6 +66,22 @@ services:
 #     cpu: 2000m
 #     memory: 4Gi
 resources: {}
+
+probes:
+  startup:
+    enabled: true
+    periodSeconds: 5
+    failureThreshold: 30
+  readiness:
+    enabled: true
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+  liveness:
+    enabled: true
+    periodSeconds: 30
+    timeoutSeconds: 5
+    failureThreshold: 3
 
 # Security context for containers
 # Set to non-empty to apply container-level security hardening
@@ -105,8 +138,6 @@ database:
 
   # Database authentication (used for both internal and external)
   auth:
-    username: dbusername
-    password: dbpassword
     database: invidious
 
   # External database configuration (when internal.enabled: false)
@@ -127,18 +158,10 @@ config:
   full_refresh: false
   https_only: false
   domain: ""
-  # CRITICAL: Generate using: pwgen 16 1
-  hmac_key: CHANGE_ME_GENERATE_RANDOM_16_CHARS
   # Performance optimizations for public instances
   use_pubsub_feeds: true
   use_innertube_for_captions: true
-  invidious_companion:
-    # Internal URL for communication between invidious and companion
-    private_url: "http://companion:8282/companion"
-    # Optional: public_url for direct companion access via reverse proxy
-    # public_url: "https://MYDOMAIN/companion"
-  # CRITICAL: Generate a different key than hmac_key using: pwgen 16 1
-  invidious_companion_key: CHANGE_ME_GENERATE_RANDOM_16_CHARS
+  invidious_companion: []
 
 # Companion configuration
 companion:

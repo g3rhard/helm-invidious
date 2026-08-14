@@ -1,4 +1,5 @@
 ---
+{{- $dbImage := .Values.database.image | default .Values.database.internal.image }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -8,13 +9,17 @@ metadata:
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
     release: {{ .Release.Name }}
 spec:
+  {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
+  {{- end }}
   selector:
     matchLabels:
       app: {{ template "invidious.name" . }}
       release: {{ .Release.Name }}
   template:
     metadata:
+      annotations:
+        checksum/config: {{ include "invidious.config" . | sha256sum }}
       labels:
         app: {{ template "invidious.name" . }}
         chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
@@ -26,18 +31,36 @@ spec:
       {{- end }}
       initContainers:
         - name: wait-for-database
-          image: "{{ .Values.database.internal.image.registry }}/{{ .Values.database.internal.image.repository }}:{{ .Values.database.internal.image.tag }}"
+          image: "{{ $dbImage.registry }}/{{ $dbImage.repository }}:{{ $dbImage.tag }}"
+          imagePullPolicy: {{ $dbImage.pullPolicy | default "IfNotPresent" }}
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secret.name }}
+                  key: {{ .Values.secret.keys.databaseUsername }}
           args:
             - /bin/sh
             - -c
             - |
               {{- if .Values.database.internal.enabled }}
-              until pg_isready -h {{ template "invidious.fullname" . }}-postgresql -p 5432 -U {{ .Values.database.auth.username }}; do
+              until pg_isready -h {{ template "invidious.fullname" . }}-postgresql -p 5432 -U "$POSTGRES_USER"; do
               {{- else }}
-              until pg_isready -h {{ .Values.database.external.host }} -p {{ .Values.database.external.port }} -U {{ .Values.database.auth.username }}; do
+              until pg_isready -h {{ .Values.database.external.host }} -p {{ .Values.database.external.port }} -U "$POSTGRES_USER"; do
               {{- end }}
                 echo "Waiting for database..."; sleep 2;
               done;
+        - name: migrate-database
+          image: "{{ .Values.images.invidious.registry }}/{{ .Values.images.invidious.image }}"
+          imagePullPolicy: {{ .Values.images.invidious.pullPolicy }}
+          command:
+            - /sbin/tini
+            - --
+          args:
+            - /invidious/invidious
+            - --migrate
+          env:
+{{ include "invidious.env" . | indent 12 }}
       containers:
         - name: invidious
           image: "{{ .Values.images.invidious.registry }}/{{ .Values.images.invidious.image }}"
@@ -45,11 +68,7 @@ spec:
           ports:
             - containerPort: 3000
           env:
-            - name: INVIDIOUS_CONFIG
-              valueFrom:
-                configMapKeyRef:
-                  key: INVIDIOUS_CONFIG
-                  name: {{ template "invidious.fullname" . }}
+{{ include "invidious.env" . | indent 12 }}
           {{- if .Values.securityContext }}
           securityContext:
 {{ toYaml .Values.securityContext | indent 12 }}
@@ -58,19 +77,30 @@ spec:
           resources:
 {{ toYaml .Values.resources | indent 12 }}
           {{- end }}
-          # readinessProbe:
-          #   httpGet:
-          #     port: 3000
-          #     path: /api/v1/trending
-          #   initialDelaySeconds: 10
-          #   periodSeconds: 10
-          #   timeoutSeconds: 5
-          # livenessProbe:
-          #   httpGet:
-          #     port: 3000
-          #     path: /api/v1/trending
-          #   initialDelaySeconds: 30
-          #   periodSeconds: 30
-          #   timeoutSeconds: 5
-          #   failureThreshold: 2
+          {{- if .Values.probes.startup.enabled }}
+          startupProbe:
+            httpGet:
+              port: 3000
+              path: /
+            periodSeconds: {{ .Values.probes.startup.periodSeconds }}
+            failureThreshold: {{ .Values.probes.startup.failureThreshold }}
+          {{- end }}
+          {{- if .Values.probes.readiness.enabled }}
+          readinessProbe:
+            httpGet:
+              port: 3000
+              path: /
+            periodSeconds: {{ .Values.probes.readiness.periodSeconds }}
+            timeoutSeconds: {{ .Values.probes.readiness.timeoutSeconds }}
+            failureThreshold: {{ .Values.probes.readiness.failureThreshold }}
+          {{- end }}
+          {{- if .Values.probes.liveness.enabled }}
+          livenessProbe:
+            httpGet:
+              port: 3000
+              path: /
+            periodSeconds: {{ .Values.probes.liveness.periodSeconds }}
+            timeoutSeconds: {{ .Values.probes.liveness.timeoutSeconds }}
+            failureThreshold: {{ .Values.probes.liveness.failureThreshold }}
+          {{- end }}
       restartPolicy: Always

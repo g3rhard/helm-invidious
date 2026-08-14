@@ -1,4 +1,6 @@
 {{- if .Values.database.internal.enabled }}
+{{- $dbImage := .Values.database.image | default .Values.database.internal.image }}
+{{- $dbResources := .Values.database.resources | default .Values.database.internal.resources }}
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -42,17 +44,23 @@ spec:
       {{- end }}
       containers:
         - name: postgresql
-          image: "{{ .Values.database.internal.image.registry }}/{{ .Values.database.internal.image.repository }}:{{ .Values.database.internal.image.tag }}"
-          imagePullPolicy: {{ .Values.database.internal.image.pullPolicy }}
+          image: "{{ $dbImage.registry }}/{{ $dbImage.repository }}:{{ $dbImage.tag }}"
+          imagePullPolicy: {{ $dbImage.pullPolicy | default "IfNotPresent" }}
           ports:
             - containerPort: 5432
           env:
             - name: POSTGRES_USER
-              value: {{ .Values.database.auth.username }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secret.name }}
+                  key: {{ .Values.secret.keys.databaseUsername }}
             - name: POSTGRES_PASSWORD
-              value: {{ .Values.database.auth.password }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secret.name }}
+                  key: {{ .Values.secret.keys.databasePassword }}
             - name: POSTGRES_DB
-              value: {{ .Values.database.auth.database }}
+              value: {{ .Values.database.auth.database | quote }}
             - name: PGDATA
               value: /var/lib/postgresql/data/pgdata
           {{- if .Values.securityContext }}
@@ -65,16 +73,16 @@ spec:
             - name: postgresql-init
               mountPath: /docker-entrypoint-initdb.d
               readOnly: true
-          {{- if .Values.database.internal.resources }}
+          {{- if $dbResources }}
           resources:
-{{ toYaml .Values.database.internal.resources | indent 12 }}
+{{ toYaml $dbResources | indent 12 }}
           {{- end }}
           livenessProbe:
             exec:
               command:
                 - /bin/sh
                 - -c
-                - pg_isready -U {{ .Values.database.auth.username }} -d {{ .Values.database.auth.database }}
+                - pg_isready -U "$POSTGRES_USER" -d "$POSTGRES_DB"
             initialDelaySeconds: 30
             periodSeconds: 30
           readinessProbe:
@@ -82,7 +90,7 @@ spec:
               command:
                 - /bin/sh
                 - -c
-                - pg_isready -U {{ .Values.database.auth.username }} -d {{ .Values.database.auth.database }}
+                - pg_isready -U "$POSTGRES_USER" -d "$POSTGRES_DB"
             initialDelaySeconds: 5
             periodSeconds: 10
       volumes:
@@ -96,5 +104,24 @@ spec:
         - name: postgresql-init
           configMap:
             name: {{ template "invidious.fullname" . }}-postgresql-init
+            items:
+              - key: playlists.sql
+                path: 01-playlists.sql
+              - key: playlist_videos.sql
+                path: 02-playlist-videos.sql
+              - key: annotations.sql
+                path: 03-annotations.sql
+              - key: channels.sql
+                path: 04-channels.sql
+              - key: channel_videos.sql
+                path: 05-channel-videos.sql
+              - key: nonces.sql
+                path: 06-nonces.sql
+              - key: session_ids.sql
+                path: 07-session-ids.sql
+              - key: users.sql
+                path: 08-users.sql
+              - key: videos.sql
+                path: 09-videos.sql
       restartPolicy: Always
 {{- end }}

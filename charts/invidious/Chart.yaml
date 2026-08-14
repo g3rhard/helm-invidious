@@ -2,17 +2,21 @@
 apiVersion: v2
 name: invidious
 description: Invidious is an alternative front-end to YouTube
-version: 2.0.4
-appVersion: latest
+type: application
+version: 2.1.0
+appVersion: 2.20260723.0
+annotations:
+  org.opencontainers.image.source: https://github.com/g3rhard/helm-invidious
 keywords:
-- youtube
-- proxy
-- video
-- privacy
-home: https://invidio.us/
+  - youtube
+  - proxy
+  - video
+  - privacy
+home: https://invidious.io/
 icon: https://raw.githubusercontent.com/iv-org/invidious/05988c1c49851b7d0094fca16aeaf6382a7f64ab/assets/favicon-32x32.png
 sources:
-- https://github.com/iv-org/invidious
+  - https://github.com/iv-org/invidious
+  - https://github.com/g3rhard/helm-invidious
 maintainers:
-- name: Leon Klingele
-  email: mail@leonklingele.de
+  - name: Kirill Trofimov
+    email: kiriru.trofimov@gmail.com
