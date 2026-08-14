@@ -25,13 +25,15 @@ secret:
     # Generate a database password with: openssl rand -hex 32
     databaseUsername: db_user
     databasePassword: db_password
-    # Generate independent HMAC and companion keys with: pwgen 16 1
+    # CRITICAL: Generate using: pwgen 20 1
+    # The referenced value MUST be a random 20-character value.
     hmacKey: hmac_key
     # Obtain po_token and visitor_data together using the current upstream
     # Invidious/companion instructions; they are not random secrets.
     poToken: po_token
     visitorData: visitor_data
-    # The referenced companion key must be exactly 16 characters long.
+    # CRITICAL: Generate using: pwgen 16 1
+    # The referenced value MUST be different from hmacKey.
     companionKey: invidious_companion_key
 
 # Horizontal Pod Autoscaler

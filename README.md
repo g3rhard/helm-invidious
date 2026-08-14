@@ -1,28 +1,31 @@
 # helm-invidious
 
-[![release][badge-gh-actions-release]][link-gh-actions-release]
+[![Helm](https://img.shields.io/badge/Helm-Chart-0F1689?style=for-the-badge&logo=helm&color=333333)](https://helm.sh/)
+[![Release](https://img.shields.io/github/actions/workflow/status/g3rhard/helm-invidious/release.yml?branch=production&style=for-the-badge&logo=githubactions&label=Release&color=333333)](https://github.com/g3rhard/helm-invidious/actions/workflows/release.yml)
+[![Version](https://img.shields.io/github/v/release/g3rhard/helm-invidious?style=for-the-badge&logo=github&color=333333)](https://github.com/g3rhard/helm-invidious/releases/latest)
 
 Deploy [Invidious] to Kubernetes with PostgreSQL and Invidious companion.
 
 ## Quick Start
 
-Create a local file containing the required Secret values:
+Generate a local env file containing the random Secret values:
 
 ```sh
-install -m 600 /dev/null invidious-secret.env
+umask 077
+cat >invidious-secret.env <<EOF
+db_user=invidious
+db_password=$(openssl rand -hex 32)
+hmac_key=$(pwgen 20 1)
+po_token=REPLACE_WITH_YOUR_PO_TOKEN
+visitor_data=REPLACE_WITH_YOUR_VISITOR_DATA
+invidious_companion_key=$(pwgen 16 1)
+EOF
+
 ${EDITOR:-vi} invidious-secret.env
 ```
 
-Add the following keys:
-
-```dotenv
-db_user=invidious
-db_password=REPLACE_WITH_A_RANDOM_DATABASE_PASSWORD
-hmac_key=REPLACE_WITH_A_RANDOM_HMAC_KEY
-po_token=REPLACE_WITH_YOUR_PO_TOKEN
-visitor_data=REPLACE_WITH_YOUR_VISITOR_DATA
-invidious_companion_key=REPLACE_WITH_EXACTLY_16_RANDOM_CHARACTERS
-```
+Replace the `po_token` and `visitor_data` placeholders with a matching pair
+before creating the Secret.
 
 Install the chart:
 
@@ -80,14 +83,16 @@ The chart does not create or encrypt secrets. The workloads consume an existing
 Kubernetes Secret directly through `secretKeyRef`. Its name and key mappings are
 configured under `secret.name` and `secret.keys`.
 
-Generate independent random values:
+The Quick Start heredoc generates independent random values for the database
+password, the exactly 20-character HMAC key, and the exactly 16-character
+companion key. To regenerate them individually:
 
 ```sh
 # Database password; hexadecimal avoids YAML quoting problems
 openssl rand -hex 32
 
-# Invidious HMAC key
-pwgen 16 1
+# Invidious HMAC key; exactly 20 characters
+pwgen 20 1
 
 # Companion key; exactly 16 characters and different from the HMAC key
 pwgen 16 1
@@ -129,7 +134,5 @@ helm template invidious charts/invidious \
   --values values-example.yaml
 ```
 
-[badge-gh-actions-release]: https://github.com/g3rhard/helm-invidious/actions/workflows/release.yml/badge.svg?branch=production
 [invidious]: https://github.com/iv-org/invidious
 [invidious-installation]: https://docs.invidious.io/installation/
-[link-gh-actions-release]: https://github.com/g3rhard/helm-invidious/actions?query=workflow%3Arelease
