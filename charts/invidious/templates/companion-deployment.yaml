@@ -32,7 +32,7 @@ spec:
       {{- end }}
       containers:
         - name: companion
-          image: "{{ .Values.images.companion.registry }}/{{ .Values.images.companion.image }}"
+          image: "{{ .Values.images.companion.registry }}/{{ .Values.images.companion.repository }}:{{ .Values.images.companion.tag }}{{ with .Values.images.companion.digest }}@{{ . }}{{ end }}"
           imagePullPolicy: {{ .Values.images.companion.pullPolicy }}
           ports:
             - containerPort: 8282

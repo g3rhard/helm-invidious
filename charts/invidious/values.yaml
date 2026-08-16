@@ -3,15 +3,21 @@ name: invidious
 images:
   invidious:
     registry: quay.io
-    image: invidious/invidious:2.20260723.0
+    repository: invidious/invidious
+    tag: 2.20260723.0
+    digest: ""
     pullPolicy: IfNotPresent
   companion:
     registry: quay.io
-    image: invidious/invidious-companion:latest
+    repository: invidious/invidious-companion
+    tag: latest
+    digest: ""
     pullPolicy: Always
   materialious:
     registry: docker.io
-    image: wardpearce/materialious:latest
+    repository: wardpearce/materialious
+    tag: latest
+    digest: ""
     pullPolicy: Always
 
 replicaCount: 1

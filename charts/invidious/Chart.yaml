@@ -3,7 +3,7 @@ apiVersion: v2
 name: invidious
 description: Invidious is an alternative front-end to YouTube
 type: application
-version: 2.1.0
+version: 2.2.0
 appVersion: 2.20260723.0
 annotations:
   org.opencontainers.image.source: https://github.com/g3rhard/helm-invidious

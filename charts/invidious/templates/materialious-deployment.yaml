@@ -30,7 +30,7 @@ spec:
       {{- end }}
       containers:
         - name: materialious
-          image: "{{ .Values.images.materialious.registry }}/{{ .Values.images.materialious.image }}"
+          image: "{{ .Values.images.materialious.registry }}/{{ .Values.images.materialious.repository }}:{{ .Values.images.materialious.tag }}{{ with .Values.images.materialious.digest }}@{{ . }}{{ end }}"
           imagePullPolicy: {{ .Values.images.materialious.pullPolicy }}
           ports:
             - containerPort: 80

@@ -60,6 +60,12 @@ rm invidious-secret.env
 Copy [values-example.yaml](values-example.yaml), adjust it for your cluster, and
 pass it during installation:
 
+Container images use separate `registry`, `repository`, `tag`, and optional
+`digest` values, as shown in the chart's `values.yaml`. Leave `digest` empty to
+render `registry/repository:tag`, or set it to `sha256:...` to render the
+immutable `registry/repository:tag@sha256:...` form. Chart 3.0.0 no longer
+accepts the former combined `image: repository:tag` value.
+
 ```sh
 helm upgrade --install invidious \
   oci://ghcr.io/g3rhard/charts/invidious \

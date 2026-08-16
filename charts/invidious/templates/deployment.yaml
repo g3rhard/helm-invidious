@@ -51,7 +51,7 @@ spec:
                 echo "Waiting for database..."; sleep 2;
               done;
         - name: migrate-database
-          image: "{{ .Values.images.invidious.registry }}/{{ .Values.images.invidious.image }}"
+          image: "{{ .Values.images.invidious.registry }}/{{ .Values.images.invidious.repository }}:{{ .Values.images.invidious.tag }}{{ with .Values.images.invidious.digest }}@{{ . }}{{ end }}"
           imagePullPolicy: {{ .Values.images.invidious.pullPolicy }}
           command:
             - /sbin/tini
@@ -63,7 +63,7 @@ spec:
 {{ include "invidious.env" . | indent 12 }}
       containers:
         - name: invidious
-          image: "{{ .Values.images.invidious.registry }}/{{ .Values.images.invidious.image }}"
+          image: "{{ .Values.images.invidious.registry }}/{{ .Values.images.invidious.repository }}:{{ .Values.images.invidious.tag }}{{ with .Values.images.invidious.digest }}@{{ . }}{{ end }}"
           imagePullPolicy: {{ .Values.images.invidious.pullPolicy }}
           ports:
             - containerPort: 3000
