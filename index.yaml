@@ -5,6 +5,31 @@ entries:
       org.opencontainers.image.source: https://github.com/g3rhard/helm-invidious
     apiVersion: v2
     appVersion: 2.20260723.0
+    created: "2026-08-16T10:56:36.732019818Z"
+    description: Invidious is an alternative front-end to YouTube
+    digest: 3b2238556358d4832906ef6b3afb35ddd56c4d6f03f79dc54fb703c9903fc82f
+    home: https://invidious.io/
+    icon: https://raw.githubusercontent.com/iv-org/invidious/05988c1c49851b7d0094fca16aeaf6382a7f64ab/assets/favicon-32x32.png
+    keywords:
+    - youtube
+    - proxy
+    - video
+    - privacy
+    maintainers:
+    - email: kiriru.trofimov@gmail.com
+      name: Kirill Trofimov
+    name: invidious
+    sources:
+    - https://github.com/iv-org/invidious
+    - https://github.com/g3rhard/helm-invidious
+    type: application
+    urls:
+    - https://github.com/g3rhard/helm-invidious/releases/download/invidious-2.2.0/invidious-2.2.0.tgz
+    version: 2.2.0
+  - annotations:
+      org.opencontainers.image.source: https://github.com/g3rhard/helm-invidious
+    apiVersion: v2
+    appVersion: 2.20260723.0
     created: "2026-08-14T11:58:58.376467364Z"
     description: Invidious is an alternative front-end to YouTube
     digest: 6471ed4469158c09f215ea338e08424e097aeccda9bfc85010d97439bdabbc99
@@ -68,4 +93,4 @@ entries:
     urls:
     - https://github.com/g3rhard/helm-invidious/releases/download/invidious-2.0.2/invidious-2.0.2.tgz
     version: 2.0.2
-generated: "2026-08-14T11:58:58.376485341Z"
+generated: "2026-08-16T10:56:36.732035147Z"
