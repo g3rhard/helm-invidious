@@ -42,7 +42,7 @@ jobs:
           helm push "$package_path" oci://ghcr.io/g3rhard/charts
 
       - name: Run chart-releaser
-        uses: helm/chart-releaser-action@v1.7.0
+        uses: helm/chart-releaser-action@v1.9.0
         with:
           push: true
         env:
