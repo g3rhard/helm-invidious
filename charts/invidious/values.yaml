@@ -124,7 +124,7 @@ database:
     image:
       registry: docker.io
       repository: postgres
-      tag: "18"
+      tag: "19"
       pullPolicy: IfNotPresent
 
     # Persistence configuration
